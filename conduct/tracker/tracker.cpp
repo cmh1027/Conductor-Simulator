@@ -2,15 +2,12 @@
 #include <QPainter>
 #include <QSet>
 #include <QPair>
-#include <QThreadPool>
 #include <cmath>
-#include <iostream>
 #include "tracker.h"
 #include "thread/detector.h"
 #include "thread/thread.h"
 #include "module/meanshift.h"
 #include "conduct/module/utility.h"
-
 
 Tracker::Tracker() : frameTimer(new QTimer()), inputTimer(new QTimer()),
     colorSelected(false), emptyFlag(0), haveLastPoint(false){
@@ -30,13 +27,39 @@ Tracker::Tracker() : frameTimer(new QTimer()), inputTimer(new QTimer()),
     inputTimer->setSingleShot(true);
     this->cameraNotOpened = Mat::zeros(480, 640, CV_8UC3);
     putText(this->cameraNotOpened, "Camera is not opened. Please set the camera in the configuration menu", Point(10, 20), 2, 0.4, Scalar::all(255));
+    this->prepareDetectors();
 }
 
 Tracker::~Tracker(){
     delete frameTimer;
     delete inputTimer;
+    foreach(auto detector, this->detectors){
+        delete detector;
+    }
+    foreach(auto queue, this->pointQueues){
+        delete queue;
+    }
 }
 
+void Tracker::prepareDetectors(){
+    Q_ASSERT(this->detectors.empty());
+    this->addDetector(new AccentDetector(), config.getQueueSize());
+    this->addDetector(new ShortAccentDetector(), config.getQueueSize());
+    this->addDetector(new ReverseAccentDetector(), config.getQueueSize());
+    this->addDetector(new WhipDetector(), config.getQueueSize());
+    this->addDetector(new VerticalBeatDetector());
+    this->addDetector(new HorizontalBeatDetector());
+}
+
+
+void Tracker::addDetector(Detector* detector, int queueSize){
+    this->pointQueues.append(new PointQueue());
+    detector->setQueue(this->pointQueues[this->pointQueues.size() - 1]);
+    detector->setQueueSize(queueSize);
+    this->detectors.append(detector);
+    connect(detector, QOverload<QString>::of(&Detector::detected), this, QOverload<QString>::of(&Tracker::commandSignal));
+    connect(detector, QOverload<QString, int>::of(&Detector::detected), this, QOverload<QString, int>::of(&Tracker::commandSignal));
+}
 
 void Tracker::start(){
     if(frameTimer->isActive())
@@ -58,11 +81,9 @@ void Tracker::stop(){
 
 
 void Tracker::clearQueues(){
-    this->accentQueue.clear();
-    this->reverseAccentQueue.clear();
-    this->whipQueue.clear();
-    this->verticalBeatQueue.clear();
-    this->horizontalBeatQueue.clear();
+    foreach(auto queue, this->pointQueues){
+        queue->clear();
+    }
 }
 
 
@@ -148,26 +169,12 @@ void Tracker::updatePicture(){
 
 
 void Tracker::detectActions(Point& point, int count, Mat& canvas){
-    auto accentThread = new AccentDetector(this->accentQueue, config.getQueueSize(), point, count, canvas);
-    connect(accentThread, QOverload<>::of(&Detector::detected), this, &Tracker::accentSignal);
-    auto reverseAccentThread = new ReverseAccentDetector(this->reverseAccentQueue, config.getQueueSize(), point, count, canvas);
-    connect(reverseAccentThread, QOverload<>::of(&Detector::detected), this, &Tracker::reverseAccentSignal);
-    auto whipThread = new WhipDetector(this->whipQueue, config.getQueueSize(), point, count, canvas);
-    connect(whipThread, QOverload<>::of(&Detector::detected), this, &Tracker::whipSignal);
-    auto verticalBeatThread = new VerticalBeatDetector(this->verticalBeatQueue, -1, point, count, canvas);
-    connect(verticalBeatThread, QOverload<int>::of(&Detector::detected), this, [=](int distance){
-        emit this->verticalBeatSignal(distance);
-    });
-    auto horizontalBeatThread = new HorizontalBeatDetector(this->horizontalBeatQueue, -1, point, count, canvas);
-    connect(horizontalBeatThread, QOverload<int>::of(&Detector::detected), this, [=](int distance){
-        emit this->horizontalBeatSignal(distance);
-    });
-    QThreadPool::globalInstance()->start(accentThread);
-    QThreadPool::globalInstance()->start(reverseAccentThread);
-    QThreadPool::globalInstance()->start(whipThread);
-    QThreadPool::globalInstance()->start(horizontalBeatThread);
-    QThreadPool::globalInstance()->start(verticalBeatThread);
-    QThreadPool::globalInstance()->waitForDone();
+    foreach(auto detector, this->detectors){
+        detector->setData(point, count, canvas);
+        detector->start();
+    }
+    foreach(auto detector, this->detectors)
+        detector->wait();
 }
 
 void Tracker::startTimer(QTimer* timer, int time){

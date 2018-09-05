@@ -80,20 +80,11 @@ bool ConductSimulator::isPausing() const{
 void ConductSimulator::applyTracker(Tracker* tracker){
     Q_ASSERT(this->tracker == nullptr);
     this->tracker = tracker;
-    connect(tracker, &Tracker::accentSignal, this, [=]{
-        this->removeCommand(Command::Accent);
+    connect(tracker, QOverload<QString>::of(&Tracker::commandSignal), this, [=](QString command){
+       this->removeCommand(command);
     });
-    connect(tracker, &Tracker::reverseAccentSignal, this, [=]{
-        this->removeCommand(Command::ReverseAccent);
-    });
-    connect(tracker, &Tracker::whipSignal, this, [=]{
-        this->removeCommand(Command::Whip);
-    });
-    connect(tracker, &Tracker::verticalBeatSignal, this, [=](int distance){
-        this->removeCommand(Command::Vertical, distance);
-    });
-    connect(tracker, &Tracker::horizontalBeatSignal, this, [=](int distance){
-        this->removeCommand(Command::Horizontal, distance);
+    connect(tracker, QOverload<QString, int>::of(&Tracker::commandSignal), this, [=](QString command, int distance){
+       this->removeCommand(command, distance);
     });
 }
 
@@ -213,6 +204,7 @@ void ConductSimulator::setDynamic(const QString& dynamic){
         this->dynamic = pp;
     else
         this->dynamic = None;
+    xmlReader->setDynamic(this->dynamic);
 }
 
 void ConductSimulator::removeCommand(const QString& command){
@@ -269,14 +261,14 @@ void ConductSimulator::commandSuccess(int remaining){
 
 void ConductSimulator::beatFail(){
     this->addScore(-100);
-    this->addEnergy(-5);
+    this->addEnergy(-10);
     emit this->commandSignal(Precision::Fail);
     emit this->dynamicSignal(Precision::Fail);
 }
 
 void ConductSimulator::commandFail(){
     this->addScore(-50);
-    this->addEnergy(-3);
+    this->addEnergy(-7);
     emit this->commandSignal(Precision::Fail);
 }
 

@@ -52,10 +52,29 @@ Scalar hsvMult(const Scalar& scalar, double hRatio, double sRatio, double vRatio
     return Scalar(h, s, v);
 }
 
+void drawPoints(Mat& canvas, const PointQueue* queue, const Scalar& scalar){
+    for(auto it = queue->begin(); it != queue->end(); it++){
+        circle(canvas, (*it), 2, scalar, CV_FILLED);
+    }
+}
+
 void drawPoints(Mat& canvas, const PointQueue& queue, const Scalar& scalar){
     for(auto it = queue.begin(); it != queue.end(); it++){
         circle(canvas, (*it), 2, scalar, CV_FILLED);
     }
+}
+
+void addPoint(PointQueue* queue, const Point& point){
+    queue->enqueue(point);
+}
+
+
+void addPoint(PointQueue* queue, int size, const Point& point){
+    if(queue->size() > size){
+        while(queue->size() > size)
+            queue->dequeue();
+    }
+    queue->enqueue(point);
 }
 
 void addPoint(PointQueue& queue, const Point& point){

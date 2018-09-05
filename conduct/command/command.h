@@ -17,6 +17,7 @@ namespace Command{
     extern const QString p;
     extern const QString pp;
     extern const QString Accent;
+    extern const QString ShortAccent;
     extern const QString ReverseAccent;
     extern const QString Staccato;
 }

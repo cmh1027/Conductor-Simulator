@@ -31,20 +31,11 @@ namespace Menu{
         connect(parent->findChild<QPushButton*>("saveCameraButton"), &QPushButton::clicked, this, [=]{
             config.setCamera(cameraLineEdit->text().toInt());
         });
-        connect(tracker, &Tracker::accentSignal, this, [=]{
-            this->addItem("Accent");
+        connect(tracker, QOverload<QString>::of(&Tracker::commandSignal), this, [=](QString command){
+           this->addItem(command);
         });
-        connect(tracker, &Tracker::reverseAccentSignal, this, [=]{
-            this->addItem("Reverse Accent");
-        });
-        connect(tracker, &Tracker::whipSignal, this, [=]{
-            this->addItem("Whip");
-        });
-        connect(tracker, &Tracker::verticalBeatSignal, this, [=](int distance){
-            this->addItem(QString("Vertial / Distance %1").arg(distance));
-        });
-        connect(tracker, &Tracker::horizontalBeatSignal, this, [=](int distance){
-            this->addItem(QString("Horizontal / Distance %1").arg(distance));
+        connect(tracker, QOverload<QString, int>::of(&Tracker::commandSignal), this, [=](QString command, int distance){
+           this->addItem(QString("%1 / Distance %2").arg(command).arg(distance));
         });
         connect(parent->findChild<QPushButton*>("backButton"), &QPushButton::clicked, this, [=]{
             disconnect(tracker, nullptr, this, nullptr);

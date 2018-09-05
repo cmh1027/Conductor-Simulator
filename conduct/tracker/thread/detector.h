@@ -1,36 +1,40 @@
 #ifndef DETECTOR_H
 #define DETECTOR_H
 #include <QObject>
-#include <QRunnable>
+#include <QThread>
 #include <QQueue>
 #include <QSet>
+#include <QString>
 #include <opencv2/core/core.hpp>
 #include "../tracker.h"
 
 using namespace cv;
 class PointQueue;
 
-class Detector : public QObject, public QRunnable
+class Detector : public QThread
 {
     Q_OBJECT
 
 public:
-    Detector(PointQueue&, int, const Point&, int, Mat&, bool = true);
+    Detector();
     virtual ~Detector() override = default;
+    void setQueue(PointQueue*);
+    void setQueueSize(int);
+    void setData(Point&, int, Mat&, bool = true);
 
 protected:
     void run() override;
-    virtual void check(PointQueue&) = 0;
-    PointQueue& queue;
+    virtual void check(PointQueue*) = 0;
+    PointQueue* queue;
     int queueSize;
     int count;
-    const Point& point;
-    Mat& canvas;
+    Point point;
+    Mat canvas;
     bool drawFlag;
 
 signals:
-    void detected();
-    void detected(int distance);
+    void detected(QString);
+    void detected(QString, int distance);
 };
 
 class AccentDetector : public Detector
@@ -42,7 +46,19 @@ public:
     virtual ~AccentDetector() override = default;
 
 private:
-    void check(PointQueue&) override;
+    void check(PointQueue*) override;
+};
+
+class ShortAccentDetector : public Detector
+{
+    Q_OBJECT
+
+public:
+    using Detector::Detector;
+    virtual ~ShortAccentDetector() override = default;
+
+private:
+    void check(PointQueue*) override;
 };
 
 class ReverseAccentDetector : public Detector
@@ -54,7 +70,7 @@ public:
     virtual ~ReverseAccentDetector() override = default;
 
 private:
-    void check(PointQueue&) override;
+    void check(PointQueue*) override;
 };
 
 
@@ -67,7 +83,7 @@ public:
     virtual ~HorizontalBeatDetector() override = default;
 
 private:
-    void check(PointQueue&) override;
+    void check(PointQueue*) override;
 };
 
 class VerticalBeatDetector : public Detector
@@ -79,7 +95,7 @@ public:
     virtual ~VerticalBeatDetector() override = default;
 
 private:
-    void check(PointQueue&) override;
+    void check(PointQueue*) override;
 };
 
 class WhipDetector : public Detector
@@ -91,7 +107,7 @@ public:
     virtual ~WhipDetector() override = default;
 
 private:
-    void check(PointQueue&) override;
+    void check(PointQueue*) override;
 };
 
 #endif

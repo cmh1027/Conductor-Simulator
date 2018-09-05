@@ -1,6 +1,7 @@
 #ifndef TRACKER_H
 #define TRACKER_H
 #include <QObject>
+#include <QVector>
 #include <QMutex>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
@@ -15,16 +16,13 @@ const int SHIFT_RADIAN = 125;
 using namespace cv;
 
 class QTimer;
-class QRunnable;
+class Detector;
 class PointQueue;
+class Detector;
+
 
 class Tracker : public QObject{
     Q_OBJECT
-    friend class Detector;
-    friend class AccentDetector;
-    friend class WhipDetector;
-    friend class HorizontalBeatDetector;
-    friend class VerticalBeatDetector;
 
 public:
     Tracker();
@@ -36,30 +34,25 @@ private:
     Ptr<BackgroundSubtractorMOG2> pMOG2;
     QTimer* frameTimer;
     QTimer* inputTimer;
-    PointQueue accentQueue;
-    PointQueue reverseAccentQueue;
-    PointQueue whipQueue;
-    PointQueue verticalBeatQueue;
-    PointQueue horizontalBeatQueue;
+    QVector<Detector*> detectors;
+    QVector<PointQueue*> pointQueues;
     QMutex mutex;
     bool colorSelected;
     int emptyFlag;
     Point lastPoint;
     bool haveLastPoint;
     Mat cameraNotOpened;
+    void prepareDetectors();
+    void addDetector(Detector*, int = -1);
     void detectActions(Point&, int, Mat&);
     void clearQueues();
     void pointFound(const Point&);
     void pointNotFound();
 
-
 signals:
     void updatePictureSignal(Mat);
-    void accentSignal();
-    void reverseAccentSignal();
-    void whipSignal();
-    void verticalBeatSignal(int);
-    void horizontalBeatSignal(int);
+    void commandSignal(QString);
+    void commandSignal(QString, int);
 
 public slots:
     void updatePicture();
