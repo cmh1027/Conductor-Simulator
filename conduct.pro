@@ -47,6 +47,8 @@ SOURCES += \
     widget/menu/editor/timelineedit.cpp \
     widget/menu/editor/menu_editor.cpp \
     widget/menu/config/menu_config.cpp \
+    widget/menu/conductor/menu_difficulty.cpp \
+    conduct/module/random.cpp
 
 HEADERS += \
     conduct/conduct.h \
@@ -72,12 +74,15 @@ HEADERS += \
     widget/menu/editor/timelineedit.h \
     widget/menu/editor/menu_editor.h \
     widget/menu/config/menu_config.h \
+    widget/menu/conductor/menu_difficulty.h \
+    conduct/module/random.h
 
 FORMS += \
     widget/menu/conductor/conductor.ui \
     widget/menu/main/main.ui \
     widget/menu/config/config.ui \
-    widget/menu/editor/editor.ui
+    widget/menu/editor/editor.ui \
+    widget/menu/conductor/difficulty.ui
 
 DISTFILES += \
     icon.ico

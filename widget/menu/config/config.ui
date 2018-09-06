@@ -14,7 +14,7 @@
    <string>Conductor Simulator</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../resources.qrc">
+   <iconset resource="../../../resources.qrc">
     <normaloff>:/icon.ico</normaloff>:/icon.ico</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
@@ -402,7 +402,7 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../../resources.qrc"/>
+  <include location="../../../resources.qrc"/>
  </resources>
  <connections/>
 </ui>

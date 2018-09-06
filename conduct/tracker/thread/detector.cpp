@@ -52,7 +52,7 @@ void AccentDetector::check(PointQueue* queue)
 void ShortAccentDetector::check(PointQueue* queue)
 {
     if(drawFlag){
-        drawPoints(canvas, this->queue, Scalar(255, 0, 0));
+        drawPoints(canvas, this->queue, Scalar(255, 0, 127));
     }
     if(queue->length() < 2)
         return;
@@ -116,7 +116,7 @@ void HorizontalBeatDetector::check(PointQueue* queue)
         line(this->canvas, (*(queue->end()-2)), (*(queue->end()-3)), Scalar(0, 255, 0));
         line(this->canvas, (*(queue->end()-3)), (*(queue->end()-4)), Scalar(0, 255, 0));
         queue->clear();
-        emit this->detected(Command::Horizontal,distance);
+        emit this->detected(Command::Horizontal, distance);
     }
 }
 
@@ -130,5 +130,17 @@ void WhipDetector::check(PointQueue* queue)
         queue->clear();
         line(this->canvas, queue->minXPoint(), queue->maxXPoint(), Scalar(255, 255, 0));
         emit this->detected(Command::Whip);
+    }
+}
+
+void DiagonalWhipDetector::check(PointQueue* queue)
+{
+    if(drawFlag){
+        drawPoints(canvas, this->queue, Scalar(255, 127, 0));
+    }
+    if(queue->maxX() - queue->minX() > 300 && queue->maxY() - queue->minY() > 150){
+        queue->clear();
+        line(this->canvas, queue->minXPoint(), queue->maxXPoint(), Scalar(255, 255, 0));
+        emit this->detected(Command::DiagonalWhip);
     }
 }

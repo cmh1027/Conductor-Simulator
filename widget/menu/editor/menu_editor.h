@@ -46,23 +46,12 @@ namespace Menu{
             void clear();
             void clearList();
             void refreshTable();
-            void typeChanged(int);
-            void addCommandRow();
-            void addCommandRow(const QString&, const QString&, const QString&);
-            void removeCommandRow();
             void appendItemList(const QString&, const QString&, const QString&);
             void beatItem();
             void dynamicItem();
             void articulationItem();
-            void setAction(int, const QString&);
-            void addMusicFile();
             void addMusicItem(const QString&, bool = false);
-            void removeMusicFile();
-            void toggleMainMusic();
-            void load();
             bool isSaveable();
-            void save();
-            void saveAs();
             bool parseXML(const QDomDocument&);
             bool parseCommand(const QDomElement&);
             bool parseMusic(const QDomElement&);
@@ -72,7 +61,19 @@ namespace Menu{
             void constructXML(QDomDocument&);
 
         public slots:
+            void load();
             void timeChanged(TimeLineEdit*);
+            void save();
+            void saveAs();
+            void typeChanged(int);
+            void addCommandRow();
+            void addCommandRow(const QString&, const QString&, const QString&);
+            void removeCommandRow();
+            void toggleMainMusic();
+            void setAction(int);
+            void addMusicFile();
+            void removeMusicFile();
+            void back();
         };
 }
 

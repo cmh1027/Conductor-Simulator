@@ -29,6 +29,7 @@ public:
     void pause();
     void resume();
     void setDynamic(Dynamic);
+    void randomizeDynamic();
     void clear();
     const QQueue<SyncTimer*>* getTimers();
 

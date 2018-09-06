@@ -17,6 +17,7 @@ namespace Menu{
         MainWindow* parent;
         void clean();
         virtual void setupUi() = 0;
+
     };
 }
 

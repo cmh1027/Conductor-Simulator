@@ -30,6 +30,7 @@ namespace Menu{
     public:
         explicit Conductor(MainWindow*);
         virtual ~Conductor() override;
+        void setDifficulty(Difficulty);
 
     private:
         void setupUi() override;
@@ -41,10 +42,11 @@ namespace Menu{
         QListWidget* list;
         QScrollBar* listScrollBar;
         QWidget* sheet;
+        QLabel* scoreLabel;
+        QLabel* energyLabel;
         QLabel* commandLabel;
         QLabel* dynamicLabel;
         QLabel* frameLabel;
-        void setSheet(QWidget*);
         void rewindSheet();
         void setCommandLabel(const QString&, const QString&);
         void setDynamicLabel(const QString&, const QString&);
@@ -54,6 +56,18 @@ namespace Menu{
         void clear();
         void command(Precision);
         void dynamic(Precision);
+        void selectFile();
+        void back();
+        void setScore(int);
+        void setEnergy(int);
+        void gameover();
+        void tick();
+        void setSheet(const QQueue<SyncTimer*>*, int, int);
+        void init();
+        void end();
+        void start();
+        void pause();
+        void updatePicture(const Mat&);
     };
 }
 

@@ -1,9 +1,10 @@
 #include <QSet>
 #include <QtXml>
 #include <QFileInfo>
-#include "../module/synctimer.h"
-#include "../module/precisetimer.h"
-#include "../command/command.h"
+#include "conduct/module/synctimer.h"
+#include "conduct/module/precisetimer.h"
+#include "conduct/command/command.h"
+#include "conduct/module/random.h"
 #include "xmlreader.h"
 const int TickInterval = 100;
 XMLReader::XMLReader(int interval) : interval(interval), timeoutCount(0), musicPlayer(new MusicPlayer(TickInterval)),
@@ -236,10 +237,16 @@ void XMLReader::setDynamic(Dynamic dynamic){
             this->setVolume(15);
             break;
         case p:
-            this->setVolume(40);
+            this->setVolume(30);
+            break;
+        case mp:
+            this->setVolume(45);
+            break;
+        case mf:
+            this->setVolume(60);
             break;
         case f:
-            this->setVolume(65);
+            this->setVolume(75);
             break;
         case ff:
             this->setVolume(90);
@@ -248,6 +255,13 @@ void XMLReader::setDynamic(Dynamic dynamic){
             this->setVolume(50);
             break;
     }
+}
+
+void XMLReader::randomizeDynamic(){
+    if(!this->volumeChangeable)
+        return;
+    for(int index = 0; index < musicPlayer->count(); ++index)
+        musicPlayer->setVolume(index, Random::pick(15, 90));
 }
 
 const QQueue<SyncTimer*>* XMLReader::getTimers(){

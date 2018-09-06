@@ -110,4 +110,15 @@ private:
     void check(PointQueue*) override;
 };
 
+class DiagonalWhipDetector : public Detector
+{
+    Q_OBJECT
+
+public:
+    using Detector::Detector;
+    virtual ~DiagonalWhipDetector() override = default;
+
+private:
+    void check(PointQueue*) override;
+};
 #endif

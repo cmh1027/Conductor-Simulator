@@ -25,53 +25,17 @@ namespace Menu{
 
     void Configuration::setupUi(){
         ui->setupUi(parent);
-        auto cameraLineEdit = parent->findChild<QLineEdit*>("cameraLineEdit");
-        cameraLineEdit->setValidator(new QIntValidator(0, 10));
-        cameraLineEdit->setText(QString::number(config.camNumber));
-        connect(parent->findChild<QPushButton*>("saveCameraButton"), &QPushButton::clicked, this, [=]{
-            config.setCamera(cameraLineEdit->text().toInt());
-        });
-        connect(tracker, QOverload<QString>::of(&Tracker::commandSignal), this, [=](QString command){
-           this->addItem(command);
-        });
-        connect(tracker, QOverload<QString, int>::of(&Tracker::commandSignal), this, [=](QString command, int distance){
-           this->addItem(QString("%1 / Distance %2").arg(command).arg(distance));
-        });
-        connect(parent->findChild<QPushButton*>("backButton"), &QPushButton::clicked, this, [=]{
-            disconnect(tracker, nullptr, this, nullptr);
-            tracker->stop();
-            parent->setup_Main();
-        });
-        connect(parent->findChild<QPushButton*>("clearButton"), &QPushButton::clicked, this, [=]{
-            this->list->clear();
-        });
-        list = parent->findChild<QListWidget*>("listWidget");
-        listScrollBar = list->verticalScrollBar();
-        auto frameLabel = new ClickableLabel();
-        frameLabel->setParent(parent->findChild<QWidget*>("frameWidget"));
-        connect(tracker, &Tracker::updatePictureSignal, this, [=](Mat m1){
-            frameLabel->setPixmap(mat2QPixmap(m1, QImage::Format_RGB888));
-        });
-        connect(frameLabel, &ClickableLabel::clicked, this, [=]{
-            auto pos = frameLabel->mapFromGlobal(QCursor::pos());
-            QColor color = QColor::fromRgb(frameLabel->pixmap()->toImage().pixel(pos.x(), pos.y()));
-            Scalar scalar = rgbTohsv(color.red(), color.green(), color.blue());
-            config.setCurrentHsv(scalar);
-            config.setCurrentRgb(color);
-            this->parent->findChild<QLabel*>("colorLabel")->setText(config.refreshRgb());
-        });
-
-        auto historySlider = parent->findChild<QSlider*>("historySlider");
-        auto kernelSlider = parent->findChild<QSlider*>("kernelSlider");
-        auto ratioSlider = parent->findChild<QSlider*>("ratioSlider");
-        auto thresholdSlider = parent->findChild<QSlider*>("thresholdSlider");
-        auto queueSizeSlider = parent->findChild<QSlider*>("queueSizeSlider");
-        auto historyLabel = parent->findChild<QLabel*>("historyLabel");
-        auto kernelLabel = parent->findChild<QLabel*>("kernelLabel");
-        auto ratioLabel = parent->findChild<QLabel*>("ratioLabel");
-        auto thresholdLabel = parent->findChild<QLabel*>("thresholdLabel");
-        auto queueSizeLabel = parent->findChild<QLabel*>("queueSizeLabel");
-
+        historySlider = parent->findChild<QSlider*>("historySlider");
+        kernelSlider = parent->findChild<QSlider*>("kernelSlider");
+        ratioSlider = parent->findChild<QSlider*>("ratioSlider");
+        thresholdSlider = parent->findChild<QSlider*>("thresholdSlider");
+        queueSizeSlider = parent->findChild<QSlider*>("queueSizeSlider");
+        historyLabel = parent->findChild<QLabel*>("historyLabel");
+        kernelLabel = parent->findChild<QLabel*>("kernelLabel");
+        ratioLabel = parent->findChild<QLabel*>("ratioLabel");
+        thresholdLabel = parent->findChild<QLabel*>("thresholdLabel");
+        queueSizeLabel = parent->findChild<QLabel*>("queueSizeLabel");
+        cameraLineEdit = parent->findChild<QLineEdit*>("cameraLineEdit");
         historySlider->setValue(config.getHistory());
         kernelSlider->setValue(config.getKernel());
         thresholdSlider->setValue(config.getThreshold());
@@ -82,39 +46,88 @@ namespace Menu{
         ratioLabel->setText(QString("%1%").arg(QString::number(ratioSlider->value())));
         thresholdLabel->setText(QString::number(thresholdSlider->value()));
         queueSizeLabel->setText(QString::number(queueSizeSlider->value()));
-
-        connect(ratioSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this,
-                [=](int value){
-            config.setRatio(value / 100.0);
-            ratioLabel->setText(QString("%1%").arg(QString::number(value)));
-            config.refreshRgb();
-        });
-        connect(thresholdSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this,
-                [=](int value){
-            config.setThreshold(value);
-            thresholdLabel->setText(QString("%1").arg(QString::number(value)));
-        });
-        connect(historySlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this,
-                [=](int value){
-            config.setHistory(value);
-            historyLabel->setText(QString::number(value));
-        });
-        connect(kernelSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this,
-                [=](int value){
-            config.setKernel(value);
-            kernelLabel->setText(QString::number(value));
-        });
-        connect(queueSizeSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this,
-                [=](int value){
-            config.setQueueSize(value);
-            queueSizeLabel->setText(QString::number(value));
-        });
+        cameraLineEdit->setValidator(new QIntValidator(0, 10));
+        cameraLineEdit->setText(QString::number(config.camNumber));
+        list = parent->findChild<QListWidget*>("listWidget");
+        listScrollBar = list->verticalScrollBar();
+        frameLabel = new ClickableLabel();
+        frameLabel->setParent(parent->findChild<QWidget*>("frameWidget"));
+        connect(parent->findChild<QPushButton*>("saveCameraButton"), &QPushButton::clicked, this, &Configuration::saveCamera);
+        connect(tracker, QOverload<QString>::of(&Tracker::commandSignal), this, QOverload<const QString&>::of(&Configuration::addItem));
+        connect(tracker, QOverload<QString, int>::of(&Tracker::commandSignal), this, QOverload<const QString&, int>::of(&Configuration::addItem));
+        connect(parent->findChild<QPushButton*>("backButton"), &QPushButton::clicked, this, &Configuration::back);
+        connect(parent->findChild<QPushButton*>("clearButton"), &QPushButton::clicked, this, &Configuration::clearList);
+        connect(tracker, &Tracker::updatePictureSignal, this, &Configuration::updatePicture);
+        connect(frameLabel, &ClickableLabel::clicked, this, &Configuration::setColor);
+        connect(ratioSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this, &Configuration::setRatio);
+        connect(thresholdSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this, &Configuration::setThreshold);
+        connect(historySlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this, &Configuration::setHistory);
+        connect(kernelSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this, &Configuration::setKernel);
+        connect(queueSizeSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this, &Configuration::setQueueSize);
         tracker->start();
     }
 
     void Configuration::addItem(const QString& text){
         this->list->addItem(text);
         listScrollBar->setValue(listScrollBar->maximum());
+    }
+
+    void Configuration::addItem(const QString& text, int distance){
+        this->list->addItem(QString("%1 / Distance %2").arg(text).arg(distance));
+        listScrollBar->setValue(listScrollBar->maximum());
+    }
+
+    void Configuration::saveCamera(){
+        config.setCamera(cameraLineEdit->text().toInt());
+    }
+
+    void Configuration::back(){
+        disconnect(tracker, nullptr, this, nullptr);
+        tracker->stop();
+        parent->setup_Main();
+    }
+
+    void Configuration::clearList(){
+        this->list->clear();
+    }
+
+    void Configuration::updatePicture(Mat m1){
+        frameLabel->setPixmap(mat2QPixmap(m1, QImage::Format_RGB888));
+    }
+
+    void Configuration::setColor(){
+        auto pos = frameLabel->mapFromGlobal(QCursor::pos());
+        QColor color = QColor::fromRgb(frameLabel->pixmap()->toImage().pixel(pos.x(), pos.y()));
+        Scalar scalar = rgbTohsv(color.red(), color.green(), color.blue());
+        config.setCurrentHsv(scalar);
+        config.setCurrentRgb(color);
+        this->parent->findChild<QLabel*>("colorLabel")->setText(config.refreshRgb());
+    }
+
+    void Configuration::setRatio(int value){
+        config.setRatio(value / 100.0);
+        ratioLabel->setText(QString("%1%").arg(QString::number(value)));
+        config.refreshRgb();
+    }
+
+    void Configuration::setThreshold(int value){
+        config.setThreshold(value);
+        thresholdLabel->setText(QString("%1").arg(QString::number(value)));
+    }
+
+    void Configuration::setHistory(int value){
+        config.setHistory(value);
+        historyLabel->setText(QString::number(value));
+    }
+
+    void Configuration::setKernel(int value){
+        config.setKernel(value);
+        kernelLabel->setText(QString::number(value));
+    }
+
+    void Configuration::setQueueSize(int value){
+        config.setQueueSize(value);
+        queueSizeLabel->setText(QString::number(value));
     }
 
 }

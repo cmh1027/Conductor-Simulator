@@ -14,8 +14,8 @@
 #include "conduct/module/synctimer.h"
 #include "scoremaker.h"
 
-extern const int ScoreInterval = 90;
-extern const int DisplayTime = 500;
+const int ScoreInterval = 90;
+const int DisplayTime = 500;
 
 namespace Menu{
     Conductor::Conductor(MainWindow *parent) : Menu::Menu(parent), tracker(new Tracker()),
@@ -41,66 +41,29 @@ namespace Menu{
 
     void Conductor::setupUi(){
         ui->setupUi(parent);
-        connect(parent->findChild<QPushButton*>("openButton"), &QPushButton::clicked, this, [=](){
-            QString &&fileName = QFileDialog::getOpenFileName(parent, "Select xml", "./", "XML files (*.xml)");
-            simulator->loadXML(fileName);
-        });
-        connect(parent->findChild<QPushButton*>("backButton"), &QPushButton::clicked, this, [=]{
-            disconnect(tracker, nullptr, this, nullptr);
-            disconnect(simulator, nullptr, this, nullptr);
-            this->commandTimer->stop();
-            this->dynamicTimer->stop();
-            simulator->clear();
-            parent->setup_Main();
-        });
         list = parent->findChild<QListWidget*>("listWidget");
         listScrollBar = list->verticalScrollBar();
-        QLabel* scoreLabel = parent->findChild<QLabel*>("scoreLabel");
-        connect(simulator, &ConductSimulator::scoreChangedSignal, this, [=](int score){
-            scoreLabel->setText(QString::number(score));
-        });
-        QLabel* energyLabel = parent->findChild<QLabel*>("energyLabel");
-        connect(simulator, &ConductSimulator::energyChangedSignal, this, [=](int energy){
-            energyLabel->resize(energy * 3, energyLabel->height());
-        });
-        connect(simulator, &ConductSimulator::gameoverSignal, this, [=]{
-            this->addItem("Game over");
-        });
+        scoreLabel = parent->findChild<QLabel*>("scoreLabel");
+        energyLabel = parent->findChild<QLabel*>("energyLabel");
+        commandLabel = parent->findChild<QLabel*>("commandLabel");
+        dynamicLabel = parent->findChild<QLabel*>("dynamicLabel");
+        frameLabel = parent->findChild<QLabel*>("frameLabel");
+        sheet = nullptr;
+        connect(parent->findChild<QPushButton*>("openButton"), &QPushButton::clicked, this, &Conductor::selectFile);
+        connect(parent->findChild<QPushButton*>("backButton"), &QPushButton::clicked, this, &Conductor::back);
+        connect(simulator, &ConductSimulator::scoreChangedSignal, this, &Conductor::setScore);
+        connect(simulator, &ConductSimulator::energyChangedSignal, this, &Conductor::setEnergy);
+        connect(simulator, &ConductSimulator::gameoverSignal, this, &Conductor::gameover);
         connect(simulator, &ConductSimulator::infoSignal, this, &Conductor::addItem);
-        this->commandLabel = parent->findChild<QLabel*>("commandLabel");
-        this->dynamicLabel = parent->findChild<QLabel*>("dynamicLabel");
-        connect(simulator, &ConductSimulator::tickSignal, this, [=](){
-            if(this->sheet != nullptr)
-                this->sheet->move(this->sheet->x() - 3, this->sheet->y());
-        });
-        connect(simulator, &ConductSimulator::initSignal, this, [=]{
-            this->list->clear();
-        });
-        connect(simulator, &ConductSimulator::endSignal, this, [=]{
-            this->addItem("End");
-        });
-        connect(simulator, &ConductSimulator::scoreSignal, this,
-                [=](const QQueue<SyncTimer*>* timers, int difInterval, int lastInterval){
-            this->setSheet(ScoreMaker::makeScore(timers, difInterval, lastInterval, parent->findChild<QWidget*>("sheetWidget")->height()));
-        });
+        connect(simulator, &ConductSimulator::tickSignal, this, &Conductor::tick);
+        connect(simulator, &ConductSimulator::initSignal, this, &Conductor::init);
+        connect(simulator, &ConductSimulator::endSignal, this, &Conductor::end);
+        connect(simulator, &ConductSimulator::makeSheetSignal, this, &Conductor::setSheet);
         connect(simulator, &ConductSimulator::commandSignal, this, &Conductor::command);
         connect(simulator, &ConductSimulator::dynamicSignal, this, &Conductor::dynamic);
-        connect(parent->findChild<QPushButton*>("startButton"), &QPushButton::clicked, this, [=]{
-            if(simulator->isPausing()){
-                simulator->resume();
-            }
-            else{
-                this->rewindSheet();
-                simulator->gameStart();
-            }
-        });
-        connect(parent->findChild<QPushButton*>("stopButton"), &QPushButton::clicked, this, [=]{
-            simulator->pause();
-        });
-        this->frameLabel = parent->findChild<QLabel*>("frameLabel");
-        connect(tracker, &Tracker::updatePictureSignal, this, [=](Mat m1){
-            this->frameLabel->setPixmap(mat2QPixmap(m1, QImage::Format_RGB888));
-        });
+        connect(parent->findChild<QPushButton*>("startButton"), &QPushButton::clicked, this, &Conductor::start);
+        connect(parent->findChild<QPushButton*>("stopButton"), &QPushButton::clicked, this, &Conductor::pause);
+        connect(tracker, &Tracker::updatePictureSignal, this, &Conductor::updatePicture);
         simulator->start();
     }
 
@@ -114,12 +77,14 @@ namespace Menu{
         list->clear();
     }
 
-    void Conductor::setSheet(QWidget* score){
-        this->sheet = score;
-        score->move(ScoreInterval, 0);
-        score->setParent(parent->findChild<QWidget*>("sheetWidget"));
-        score->show();
-        score->lower();
+    void Conductor::setSheet(const QQueue<SyncTimer*>* timers, int difInterval, int lastInterval){
+        if(sheet != nullptr)
+            delete sheet;
+        this->sheet = ScoreMaker::makeScore(timers, difInterval, lastInterval, parent->findChild<QWidget*>("sheetWidget")->height());
+        sheet->setParent(parent->findChild<QWidget*>("sheetWidget"));
+        sheet->move(ScoreInterval, 0);
+        sheet->show();
+        sheet->lower();
     }
 
     void Conductor::rewindSheet(){
@@ -177,4 +142,67 @@ namespace Menu{
             break;
         }
     }
+
+    void Conductor::setDifficulty(Difficulty dif){
+        this->simulator->setDifficulty(dif);
+    }
+
+    void Conductor::selectFile(){
+        QString &&fileName = QFileDialog::getOpenFileName(parent, "Select xml", "./", "XML files (*.xml)");
+        simulator->loadXML(fileName);
+    }
+
+    void Conductor::back(){
+        disconnect(tracker, nullptr, this, nullptr);
+        disconnect(simulator, nullptr, this, nullptr);
+        this->commandTimer->stop();
+        this->dynamicTimer->stop();
+        simulator->clear();
+        parent->setup_Main();
+    }
+
+    void Conductor::setScore(int score){
+        scoreLabel->setText(QString::number(score));
+    }
+
+    void Conductor::setEnergy(int energy){
+        energyLabel->resize(energy * 3, energyLabel->height());
+    }
+
+    void Conductor::gameover(){
+        this->addItem("Game over");
+    }
+
+    void Conductor::tick(){
+        if(this->sheet != nullptr)
+            this->sheet->move(this->sheet->x() - 3, this->sheet->y());
+    }
+
+    void Conductor::init(){
+        this->list->clear();
+    }
+
+    void Conductor::end(){
+        this->addItem("End");
+    }
+
+    void Conductor::start(){
+        if(simulator->isPausing()){
+            simulator->resume();
+        }
+        else{
+            this->rewindSheet();
+            simulator->gameStart();
+        }
+    }
+
+    void Conductor::pause(){
+        simulator->pause();
+    }
+
+    void Conductor::updatePicture(const Mat& m1){
+        this->frameLabel->setPixmap(mat2QPixmap(m1, QImage::Format_RGB888));
+    }
+
+
 }

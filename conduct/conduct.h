@@ -17,6 +17,7 @@ class CountDownTimer;
 typedef enum {Easy, Normal, Hard} Difficulty;
 typedef enum {Perfect, Excellent, Good, Bad, Fail} Precision;
 extern const QMap<Difficulty, int> DifInterval;
+extern const QMap<Difficulty, double> DifProb;
 extern const int LastInterval;
 extern const int TickInterval;
 extern const int MaxEnergy;
@@ -56,7 +57,7 @@ private:
     void commandSuccess(int);
     void commandFail();
     void beatFail();
-    void checkDynamic(int, int, int);
+    bool checkDynamic(int, int, int);
     void setScore(int);
     void setEnergy(int);
     void addScore(int);
@@ -69,7 +70,7 @@ signals:
     void energyChangedSignal(int);
     void endSignal();
     void initSignal();
-    void scoreSignal(const QQueue<SyncTimer*>*, int, int);
+    void makeSheetSignal(const QQueue<SyncTimer*>*, int, int);
     void tickSignal();
     void commandSignal(Precision);
     void dynamicSignal(Precision);

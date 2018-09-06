@@ -12,6 +12,10 @@ namespace Ui {
 class Tracker;
 class QListWidget;
 class QScrollBar;
+class QSlider;
+class QLabel;
+class QLineEdit;
+class ClickableLabel;
 
 namespace Menu{
     class Configuration : public Menu::Menu{
@@ -27,9 +31,32 @@ namespace Menu{
         QListWidget* list;
         QScrollBar* listScrollBar;
         Tracker* tracker;
+        QSlider* historySlider;
+        QSlider* kernelSlider;
+        QSlider* ratioSlider;
+        QSlider* thresholdSlider;
+        QSlider* queueSizeSlider;
+        QLabel* historyLabel;
+        QLabel* kernelLabel;
+        QLabel* ratioLabel;
+        QLabel* thresholdLabel;
+        QLabel* queueSizeLabel;
+        QLineEdit* cameraLineEdit;
+        ClickableLabel* frameLabel;
 
     public slots:
         void addItem(const QString&);
+        void addItem(const QString&, int);
+        void saveCamera();
+        void back();
+        void clearList();
+        void updatePicture(Mat);
+        void setColor();
+        void setRatio(int);
+        void setThreshold(int);
+        void setHistory(int);
+        void setKernel(int);
+        void setQueueSize(int);
 
     };
 }

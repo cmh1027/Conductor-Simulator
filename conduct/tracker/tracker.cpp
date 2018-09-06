@@ -47,6 +47,7 @@ void Tracker::prepareDetectors(){
     this->addDetector(new ShortAccentDetector(), config.getQueueSize());
     this->addDetector(new ReverseAccentDetector(), config.getQueueSize());
     this->addDetector(new WhipDetector(), config.getQueueSize());
+    this->addDetector(new DiagonalWhipDetector(), config.getQueueSize());
     this->addDetector(new VerticalBeatDetector());
     this->addDetector(new HorizontalBeatDetector());
 }

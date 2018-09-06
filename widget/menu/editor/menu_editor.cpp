@@ -26,15 +26,6 @@ namespace Menu{
 
     void Editor::setupUi(){
         ui->setupUi(parent);
-        connect(parent->findChild<QAction*>("actionLoad"), &QAction::triggered, this, [=](){
-            this->load();
-        });
-        connect(parent->findChild<QAction*>("actionSave"), &QAction::triggered, this, [=](){
-            this->save();
-        });
-        connect(parent->findChild<QAction*>("actionSaveAs"), &QAction::triggered, this, [=](){
-            this->saveAs();
-        });
         this->tableWidget = parent->findChild<QTableWidget*>();
         this->tableWidget->horizontalHeader()->setStretchLastSection(true);
         this->typeComboBox = parent->findChild<QComboBox*>("typeComboBox");
@@ -43,35 +34,20 @@ namespace Menu{
         this->musicTableWidget->setColumnWidth(MusicColumn::Main, 35);
         this->musicTableWidget->horizontalHeader()->setStretchLastSection(true);
         this->typeChanged(0);
-        connect(this->typeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](int index){
-            this->typeChanged(index);
-        });
+        connect(parent->findChild<QAction*>("actionLoad"), &QAction::triggered, this, &Editor::load);
+        connect(parent->findChild<QAction*>("actionSave"), &QAction::triggered, this, &Editor::save);
+        connect(parent->findChild<QAction*>("actionSaveAs"), &QAction::triggered, this, &Editor::saveAs);
         connect(parent->findChild<QPushButton*>("addButton"), &QPushButton::clicked, this, [=]{
             this->addCommandRow();
             this->refreshTable();
         });
-        connect(parent->findChild<QPushButton*>("removeButton"), &QPushButton::clicked, this, [=]{
-            this->removeCommandRow();
-        });
-        connect(parent->findChild<QPushButton*>("toggleMainButton"), &QPushButton::clicked, this, [=]{
-            this->toggleMainMusic();
-        });
-        connect(this->actionComboBox, QOverload<int>::of(&QComboBox::activated), this, [=](int){
-            int row = this->tableWidget->currentRow();
-            if(row != -1){
-                this->setAction(row, this->actionComboBox->currentText());
-            }
-        });
-        connect(parent->findChild<QPushButton*>("addMusicButton"), &QPushButton::clicked, this, [=]{
-            this->addMusicFile();
-        });
-        connect(parent->findChild<QPushButton*>("removeMusicButton"), &QPushButton::clicked, this, [=]{
-            this->removeMusicFile();
-        });
-        connect(parent->findChild<QPushButton*>("backButton"), &QPushButton::clicked, this, [=]{
-            this->clearList();
-            parent->setup_Main();
-        });
+        connect(parent->findChild<QPushButton*>("removeButton"), &QPushButton::clicked, this, &Editor::removeCommandRow);
+        connect(parent->findChild<QPushButton*>("toggleMainButton"), &QPushButton::clicked, this, &Editor::toggleMainMusic);
+        connect(this->typeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Editor::typeChanged);
+        connect(this->actionComboBox, QOverload<int>::of(&QComboBox::activated), this, &Editor::setAction);
+        connect(parent->findChild<QPushButton*>("addMusicButton"), &QPushButton::clicked, this, &Editor::addMusicFile);
+        connect(parent->findChild<QPushButton*>("removeMusicButton"), &QPushButton::clicked, this, &Editor::removeMusicFile);
+        connect(parent->findChild<QPushButton*>("backButton"), &QPushButton::clicked, this, &Editor::back);
     }
 
     void Editor::clear(){
@@ -200,13 +176,6 @@ namespace Menu{
     }
 
 
-
-    void Editor::setAction(int row, const QString& text){
-        auto actionPtr = this->tableItemList.at(row).at(CommandColumn::Action);
-        actionPtr->replace(0, actionPtr->length(), text);
-        this->tableWidget->item(row, CommandColumn::Action)->setText(text);
-    }
-
     void Editor::addMusicFile(){
         QStringList &&fileNames = QFileDialog::getOpenFileNames(parent, "Select music", "./", "music files (*.wav *.mp3 *.mid)");
         bool exist;
@@ -258,6 +227,17 @@ namespace Menu{
             else{
                 item->setText("");
             }
+        }
+    }
+
+    void Editor::setAction(int){
+        int row = this->tableWidget->currentRow();
+        if(row != -1){
+            QString&& text = this->actionComboBox->currentText();
+            auto actionPtr = this->tableItemList.at(row).at(CommandColumn::Action);
+            actionPtr->replace(0, actionPtr->length(), text);
+            this->tableWidget->item(row, CommandColumn::Action)->setText(text);
+
         }
     }
 
@@ -444,5 +424,10 @@ namespace Menu{
         auto timePtr = this->tableItemList.at(timeItem->getRow()).at(CommandColumn::Time);
         timePtr->replace(0, timePtr->length(), timeItem->text());
         this->refreshTable();
+    }
+
+    void Editor::back(){
+        this->clearList();
+        parent->setup_Main();
     }
 }

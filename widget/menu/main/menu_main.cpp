@@ -14,9 +14,9 @@ namespace Menu{
     void Main::setupUi(){
         ui->setupUi(parent);
         parent->resize(305, parent->height());
-        connect(parent->findChild<QToolButton*>("playButton"), &QPushButton::clicked, parent, &MainWindow::setup_Conductor);
-        connect(parent->findChild<QToolButton*>("editorButton"), &QPushButton::clicked, parent, &MainWindow::setup_Editor);
-        connect(parent->findChild<QToolButton*>("configButton"), &QPushButton::clicked, parent, &MainWindow::setup_Config);
+        connect(parent->findChild<QToolButton*>("playButton"), &QToolButton::clicked, parent, &MainWindow::setup_Difficulty);
+        connect(parent->findChild<QToolButton*>("editorButton"), &QToolButton::clicked, parent, &MainWindow::setup_Editor);
+        connect(parent->findChild<QToolButton*>("configButton"), &QToolButton::clicked, parent, &MainWindow::setup_Config);
     }
 
 }
