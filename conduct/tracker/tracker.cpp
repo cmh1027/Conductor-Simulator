@@ -3,11 +3,17 @@
 #include <QSet>
 #include <QPair>
 #include <cmath>
+#include <vector>
 #include "tracker.h"
 #include "thread/detector.h"
 #include "thread/thread.h"
 #include "module/meanshift.h"
 #include "conduct/module/utility.h"
+
+cv::String faceCascade = ":/resources/haarcascade_frontalface_alt.xml";
+cv::String eyeCascade = ":/resources/haarcascade_eye.xml";
+CascadeClassifier faceClassifier;
+CascadeClassifier eyeClassifier;
 
 Tracker::Tracker() : frameTimer(new QTimer()), inputTimer(new QTimer()),
     colorSelected(false), emptyFlag(0), haveLastPoint(false){
@@ -28,6 +34,8 @@ Tracker::Tracker() : frameTimer(new QTimer()), inputTimer(new QTimer()),
     this->cameraNotOpened = Mat::zeros(480, 640, CV_8UC3);
     putText(this->cameraNotOpened, "Camera is not opened. Please set the camera in the configuration menu", Point(10, 20), 2, 0.4, Scalar::all(255));
     this->prepareDetectors();
+    faceClassifier.load(faceCascade);
+    eyeClassifier.load(eyeCascade);
 }
 
 Tracker::~Tracker(){
@@ -101,6 +109,7 @@ void Tracker::updatePicture(){
     Mat object;
     Mat colorMask;
     Mat actionCanvas;
+    Mat eyes;
     bool hsvExtension = false;
     config.readFrame(frame);
     actionCanvas = Mat::zeros(frame.rows, frame.cols, frame.type());
@@ -163,8 +172,10 @@ void Tracker::updatePicture(){
     if(count > 0)
         circle(actionCanvas, point, 10, Scalar(255, 0, 0), 2);
     this->detectActions(point, count, actionCanvas);
+    eyes = this->detectEyes(frame);
     cvtColor(frame, frame, COLOR_BGR2RGB);
     bitwise_or(frame, actionCanvas, frame);
+    bitwise_or(frame, eyes, frame);
     emit this->updatePictureSignal(frame);
 }
 
@@ -198,3 +209,25 @@ void Tracker::pointNotFound(){
 }
 
 
+Mat Tracker::detectEyes(Mat& img){
+    Mat gray;
+    Mat result;
+    cvtColor(img, gray, CV_BGR2GRAY);
+    std::vector<Rect> face_pos;
+    faceClassifier.detectMultiScale(gray, face_pos, 1.1, 3, 0 | CV_HAAR_SCALE_IMAGE, Size(10, 10));
+    for (int i = 0; i < static_cast<int>(face_pos.size()); i++)    {
+        rectangle(result, face_pos[i], Scalar(0, 255, 0), 2);
+    }
+    for (int i = 0; i < static_cast<int>(face_pos.size()); i++) {
+        std::vector<Rect> eye_pos;
+        Mat roi = gray(face_pos[i]);
+        eyeClassifier.detectMultiScale(roi, eye_pos, 1.1, 3, 0 | CV_HAAR_SCALE_IMAGE, Size(10, 10));
+        for (int j = 0; j < static_cast<int>(face_pos.size()); j++) {
+            Point center(face_pos[i].x + eye_pos[j].x + (eye_pos[j].width / 2),
+                       face_pos[i].y + eye_pos[j].y + (eye_pos[j].height / 2));
+            int radius = cvRound((eye_pos[j].width + eye_pos[j].height) * 0.2);
+            circle(result, center, radius, Scalar(0, 0, 255), 2);
+        }
+    }
+    return result;
+}

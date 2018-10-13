@@ -11,6 +11,12 @@
 
 extern const int THREAD_COUNT;
 extern Configuration config;
+extern cv::String faceCascade;
+extern cv::String eyeCascade;
+extern CascadeClassifier faceClassifier;
+extern CascadeClassifier eyeClassifier;
+
+
 const int SHIFT_RADIAN = 125;
 
 using namespace cv;
@@ -48,6 +54,7 @@ private:
     void clearQueues();
     void pointFound(const Point&);
     void pointNotFound();
+    Mat detectEyes(Mat&);
 
 signals:
     void updatePictureSignal(Mat);

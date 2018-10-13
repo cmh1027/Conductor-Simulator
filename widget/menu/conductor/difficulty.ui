@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../../resources.qrc">
+    <normaloff>:/resources/icon.ico</normaloff>:/resources/icon.ico</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(255, 253, 230);</string>
   </property>
@@ -220,6 +224,8 @@ QToolButton:hover{background-color: rgb(243, 175, 255);}</string>
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

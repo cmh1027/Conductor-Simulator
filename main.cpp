@@ -4,7 +4,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QFontDatabase::addApplicationFont(":/MaestroTimes.ttf");
+    QFontDatabase::addApplicationFont(":/resources/MaestroTimes.ttf");
     MainWindow w;
     w.show();
 
