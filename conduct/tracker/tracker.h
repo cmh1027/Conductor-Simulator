@@ -16,7 +16,6 @@ extern cv::String eyeCascade;
 extern CascadeClassifier faceClassifier;
 extern CascadeClassifier eyeClassifier;
 
-
 const int SHIFT_RADIAN = 125;
 
 using namespace cv;
@@ -48,6 +47,7 @@ private:
     Point lastPoint;
     bool haveLastPoint;
     Mat cameraNotOpened;
+    Rect lastEyesPoint;
     void prepareDetectors();
     void addDetector(Detector*, int = -1);
     void detectActions(Point&, int, Mat&);

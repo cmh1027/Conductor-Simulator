@@ -11,6 +11,7 @@
 #include "ui_config.h"
 #include "conduct/tracker/tracker.h"
 #include "conduct/module/utility.h"
+#include "conduct/command/command.h"
 
 namespace Menu{
     Configuration::Configuration(MainWindow *parent) : Menu::Menu(parent),
@@ -49,6 +50,13 @@ namespace Menu{
         cameraLineEdit->setValidator(new QIntValidator(0, 10));
         cameraLineEdit->setText(QString::number(config.camNumber));
         list = parent->findChild<QListWidget*>("listWidget");
+        commandList = parent->findChild<QListWidget*>("commandListWidget");
+        foreach(auto beat, Beats){
+            commandList->addItem(beat);
+        }
+        foreach(auto beat, Commands){
+            commandList->addItem(beat);
+        }
         listScrollBar = list->verticalScrollBar();
         frameLabel = new ClickableLabel();
         frameLabel->setParent(parent->findChild<QWidget*>("frameWidget"));
@@ -68,13 +76,21 @@ namespace Menu{
     }
 
     void Configuration::addItem(const QString& text){
-        this->list->addItem(text);
-        listScrollBar->setValue(listScrollBar->maximum());
+        foreach(auto item, commandList->selectedItems()){
+            if(item->text() == text){
+                this->list->addItem(text);
+                listScrollBar->setValue(listScrollBar->maximum());
+            }
+        }
     }
 
     void Configuration::addItem(const QString& text, int distance){
-        this->list->addItem(QString("%1 / Distance %2").arg(text).arg(distance));
-        listScrollBar->setValue(listScrollBar->maximum());
+        foreach(auto item, commandList->selectedItems()){
+            if(item->text() == text){
+                this->list->addItem(QString("%1 / Distance %2").arg(text).arg(distance));
+                listScrollBar->setValue(listScrollBar->maximum());
+            }
+        }
     }
 
     void Configuration::saveCamera(){

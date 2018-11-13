@@ -95,18 +95,20 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 SUBDIRS += \
     conduct.pro
 
-INCLUDEPATH += D:\opencv\build\include
-INCLUDEPATH += D:\FMOD\api\lowlevel\inc
+INCLUDEPATH += D:/opencv_3.2.0_32bit/build/include
+# INCLUDEPATH += D:/opencv_contrib/modules/face/include
+INCLUDEPATH += D:/FMOD/api/lowlevel/inc
 
 
-LIBS += -LD:/opencv-build/bin/ -llibopencv_core320
-LIBS += -LD:/opencv-build/bin/ -llibopencv_highgui320
-LIBS += -LD:/opencv-build/bin/ -llibopencv_imgcodecs320
-LIBS += -LD:/opencv-build/bin/ -llibopencv_imgproc320
-LIBS += -LD:/opencv-build/bin/ -llibopencv_features2d320
-LIBS += -LD:/opencv-build/bin/ -llibopencv_calib3d320
-LIBS += -LD:/opencv-build/bin/ -llibopencv_videoio320
-LIBS += -LD:/opencv-build/bin/ -llibopencv_video320
+LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_core320
+LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_highgui320
+LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_imgcodecs320
+LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_imgproc320
+LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_features2d320
+LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_calib3d320
+LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_videoio320
+LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_video320
+LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_objdetect320
 LIBS += -LD:/FMOD/api/lowlevel/lib -lfmod
 
 RESOURCES += \

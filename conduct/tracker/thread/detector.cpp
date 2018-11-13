@@ -4,7 +4,7 @@
 #include "conduct/command/command.h"
 #include <cmath>
 
-Detector::Detector() : queue(nullptr), queueSize(-1), count(0), drawFlag(true){}
+Detector::Detector() : queue(nullptr), queueSize(-1), count(0){}
 
 void Detector::setQueue(PointQueue* queue){
     this->queue = queue;
@@ -14,11 +14,10 @@ void Detector::setQueueSize(int queueSize){
     this->queueSize = queueSize;
 }
 
-void Detector::setData(Point& point, int count, Mat& canvas, bool drawFlag){
+void Detector::setData(Point& point, int count, Mat& canvas){
     this->count = count;
     this->point = point;
     this->canvas = canvas;
-    this->drawFlag = drawFlag;
 }
 
 void Detector::run()
@@ -35,9 +34,6 @@ void Detector::run()
 
 void AccentDetector::check(PointQueue* queue)
 {
-    if(drawFlag){
-        drawPoints(canvas, this->queue, Scalar(255, 0, 0));
-    }
     if(queue->length() < 2)
         return;
     auto tail = queue->end() - 1;
@@ -51,9 +47,6 @@ void AccentDetector::check(PointQueue* queue)
 
 void ShortAccentDetector::check(PointQueue* queue)
 {
-    if(drawFlag){
-        drawPoints(canvas, this->queue, Scalar(255, 0, 127));
-    }
     if(queue->length() < 2)
         return;
     auto tail = queue->end() - 1;
@@ -67,9 +60,6 @@ void ShortAccentDetector::check(PointQueue* queue)
 
 void ReverseAccentDetector::check(PointQueue* queue)
 {
-    if(drawFlag){
-        drawPoints(canvas, this->queue, Scalar(255, 0, 0));
-    }
     if(queue->length() < 2)
         return;
     auto tail = queue->end() - 1;
@@ -83,9 +73,6 @@ void ReverseAccentDetector::check(PointQueue* queue)
 
 void VerticalBeatDetector::check(PointQueue* queue)
 {
-    if(drawFlag){
-        drawPoints(canvas, this->queue, Scalar(0, 255, 0));
-    }
     if(queue->length() < 4)
         return;
     int first = (*(queue->end()-1)).y - (*(queue->end()-2)).y;
@@ -103,9 +90,6 @@ void VerticalBeatDetector::check(PointQueue* queue)
 
 void HorizontalBeatDetector::check(PointQueue* queue)
 {
-    if(drawFlag){
-        drawPoints(canvas, this->queue, Scalar(0, 0, 255));
-    }
     if(queue->length() < 4)
         return;
     int first = (*(queue->end()-1)).x - (*(queue->end()-2)).x;
@@ -123,9 +107,6 @@ void HorizontalBeatDetector::check(PointQueue* queue)
 
 void WhipDetector::check(PointQueue* queue)
 {
-    if(drawFlag){
-        drawPoints(canvas, this->queue, Scalar(255, 255, 0));
-    }
     if(queue->maxX() - queue->minX() > 300 && queue->maxY() - queue->minY() < 70){
         queue->clear();
         line(this->canvas, queue->minXPoint(), queue->maxXPoint(), Scalar(255, 255, 0));
@@ -135,12 +116,36 @@ void WhipDetector::check(PointQueue* queue)
 
 void DiagonalWhipDetector::check(PointQueue* queue)
 {
-    if(drawFlag){
-        drawPoints(canvas, this->queue, Scalar(255, 127, 0));
-    }
     if(queue->maxX() - queue->minX() > 300 && queue->maxY() - queue->minY() > 150){
         queue->clear();
         line(this->canvas, queue->minXPoint(), queue->maxXPoint(), Scalar(255, 255, 0));
         emit this->detected(Command::DiagonalWhip);
     }
 }
+
+void VerticalSwingDetector::check(PointQueue* queue)
+{
+    if(queue->length() < 2)
+        return;
+    auto tail = queue->end() - 1;
+    auto tail2 = queue->end() - 2;
+    if(std::abs((*tail).y - (*tail2).y) < 10 && queue->maxY() - queue->minY() > 80){
+        queue->clear();
+        line(this->canvas, queue->minYPoint(), queue->maxYPoint(), Scalar(255, 127, 127));
+        emit this->detected(Command::VerticalSwing);
+    }
+}
+
+void HorizontalSwingDetector::check(PointQueue* queue)
+{
+    if(queue->length() < 2)
+        return;
+    auto tail = queue->end() - 1;
+    auto tail2 = queue->end() - 2;
+    if(std::abs((*tail).x - (*tail2).x) < 10 && queue->maxX() - queue->minX() > 80){
+        queue->clear();
+        line(this->canvas, queue->minXPoint(), queue->maxXPoint(), Scalar(127, 127, 255));
+        emit this->detected(Command::HorizontalSwing);
+    }
+}
+

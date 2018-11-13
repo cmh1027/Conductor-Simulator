@@ -302,15 +302,15 @@
     <property name="geometry">
      <rect>
       <x>640</x>
-      <y>0</y>
+      <y>260</y>
       <width>361</width>
-      <height>480</height>
+      <height>220</height>
      </rect>
     </property>
     <property name="minimumSize">
      <size>
       <width>361</width>
-      <height>480</height>
+      <height>220</height>
      </size>
     </property>
     <property name="styleSheet">
@@ -396,6 +396,26 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
     </property>
     <property name="text">
      <string>Save</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="commandListWidget">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>10</y>
+      <width>191</width>
+      <height>231</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>160</width>
+      <height>200</height>
+     </size>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: none;
+background-color: rgb(255, 255, 255);</string>
     </property>
    </widget>
   </widget>

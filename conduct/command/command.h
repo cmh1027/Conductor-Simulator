@@ -13,6 +13,8 @@ extern const QMap<QString, QString> Marks;
 namespace Command{
     extern const QString Vertical;
     extern const QString Horizontal;
+    extern const QString VerticalSwing;
+    extern const QString HorizontalSwing;
     extern const QString Whip;
     extern const QString DiagonalWhip;
     extern const QString ff;

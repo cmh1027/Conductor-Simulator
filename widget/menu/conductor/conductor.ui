@@ -105,6 +105,9 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
      <string notr="true">border: none;
 background-color: rgb(255, 255, 255);</string>
     </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
    </widget>
    <widget class="QPushButton" name="openButton">
     <property name="geometry">

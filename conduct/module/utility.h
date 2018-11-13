@@ -4,6 +4,7 @@
 #include <opencv2/core/core.hpp>
 #include <QPixmap>
 #include <QQueue>
+#include <vector>
 extern const int THREAD_COUNT;
 using namespace cv;
 class PointQueue;
@@ -25,4 +26,6 @@ void findPixelsInCircle(const Point, int, const QSet<QPair<int, int>>&, QQueue<Q
 void findPixelsInCircle(const QPair<int, int>&, int, const QSet<QPair<int, int>>&, QQueue<QPair<int, int>>&);
 QPair<int, int> findCentroid(const QQueue<QPair<int, int>>&);
 QPair<int, int> findCentroid(const QSet<QPair<int, int>>&);
+//void drawPolyline(Mat&, const std::vector<Point2f>, const int, const int, bool = false, const Scalar& = Scalar(255, 200, 0));
+//void drawLandmarks(Mat&, std::vector<Point2f>&, const Scalar& = Scalar(255, 200, 0));
 #endif // UTILITY_H

@@ -20,7 +20,7 @@ public:
     virtual ~Detector() override = default;
     void setQueue(PointQueue*);
     void setQueueSize(int);
-    void setData(Point&, int, Mat&, bool = true);
+    void setData(Point&, int, Mat&);
 
 protected:
     void run() override;
@@ -30,7 +30,6 @@ protected:
     int count;
     Point point;
     Mat canvas;
-    bool drawFlag;
 
 signals:
     void detected(QString);
@@ -117,6 +116,30 @@ class DiagonalWhipDetector : public Detector
 public:
     using Detector::Detector;
     virtual ~DiagonalWhipDetector() override = default;
+
+private:
+    void check(PointQueue*) override;
+};
+
+class VerticalSwingDetector : public Detector
+{
+    Q_OBJECT
+
+public:
+    using Detector::Detector;
+    virtual ~VerticalSwingDetector() override = default;
+
+private:
+    void check(PointQueue*) override;
+};
+
+class HorizontalSwingDetector : public Detector
+{
+    Q_OBJECT
+
+public:
+    using Detector::Detector;
+    virtual ~HorizontalSwingDetector() override = default;
 
 private:
     void check(PointQueue*) override;

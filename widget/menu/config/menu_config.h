@@ -29,6 +29,7 @@ namespace Menu{
         void setupUi() override;
         Ui::Configuration* ui;
         QListWidget* list;
+        QListWidget* commandList;
         QScrollBar* listScrollBar;
         Tracker* tracker;
         QSlider* historySlider;
