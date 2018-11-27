@@ -113,3 +113,11 @@ void Configuration::setCamera(int number){
     cam->open(number);
     this->camNumber = number;
 }
+
+void Configuration::setEyeDetectorPath(const QString& path){
+    this->eyeDetectorPath = path;
+}
+
+QString Configuration::getEyeDetectorPath() const{
+    return this->eyeDetectorPath;
+}

@@ -356,7 +356,7 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
     <property name="geometry">
      <rect>
       <x>610</x>
-      <y>560</y>
+      <y>552</y>
       <width>21</width>
       <height>20</height>
      </rect>
@@ -372,7 +372,7 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
     <property name="geometry">
      <rect>
       <x>510</x>
-      <y>562</y>
+      <y>554</y>
       <width>94</width>
       <height>16</height>
      </rect>
@@ -385,7 +385,7 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
     <property name="geometry">
      <rect>
       <x>640</x>
-      <y>558</y>
+      <y>550</y>
       <width>41</width>
       <height>23</height>
      </rect>
@@ -416,6 +416,49 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
     <property name="styleSheet">
      <string notr="true">border: none;
 background-color: rgb(255, 255, 255);</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>580</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Eye detector</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pathButton">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>577</y>
+      <width>41</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton{border: none; background-color: rgb(212, 212, 212);}
+QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
+    </property>
+    <property name="text">
+     <string>Path</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="pathLabel">
+    <property name="geometry">
+     <rect>
+      <x>650</x>
+      <y>580</y>
+      <width>201</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>

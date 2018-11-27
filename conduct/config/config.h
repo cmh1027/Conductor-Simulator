@@ -1,6 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 #include <QColor>
+#include <QString>
 #include <opencv2/opencv.hpp>
 
 using namespace cv;
@@ -30,6 +31,8 @@ public:
     void cameraOn();
     void cameraOff();
     bool isCamOpened();
+    void setEyeDetectorPath(const QString&);
+    QString getEyeDetectorPath() const;
 
 private:
     double ratio;
@@ -45,6 +48,7 @@ private:
     Scalar wideHsvLowerBound;
     VideoCapture* cam;
     int camNumber;
+    QString eyeDetectorPath;
     QString refreshRgb();
     void setCurrentRgb(const QColor&);
     void setCurrentHsv(const Scalar&);

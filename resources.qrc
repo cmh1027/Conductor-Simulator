@@ -2,7 +2,5 @@
 <qresource>
   <file>resources/icon.ico</file>
   <file>resources/MaestroTimes.ttf</file>
-  <file>resources/haarcascade_eye.xml</file>
-  <file>resources/haarcascade_frontalface_default.xml</file>
 </qresource>
 </RCC>
