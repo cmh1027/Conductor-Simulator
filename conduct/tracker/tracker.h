@@ -11,10 +11,6 @@
 
 extern const int THREAD_COUNT;
 extern Configuration config;
-extern cv::String faceCascade;
-extern cv::String eyeCascade;
-extern CascadeClassifier faceClassifier;
-extern CascadeClassifier eyeClassifier;
 
 const int SHIFT_RADIAN = 125;
 
@@ -24,7 +20,7 @@ class QTimer;
 class Detector;
 class PointQueue;
 class Detector;
-
+class EyeDetector;
 
 class Tracker : public QObject{
     Q_OBJECT
@@ -34,6 +30,7 @@ public:
     virtual ~Tracker();
     void start();
     void stop();
+    void turnonEyeDetector();
 
 private:
     Ptr<BackgroundSubtractorMOG2> pMOG2;
@@ -48,13 +45,14 @@ private:
     bool haveLastPoint;
     Mat cameraNotOpened;
     Rect lastEyesPoint;
+    EyeDetector* eyeDetector;
+    Point eyes;
     void prepareDetectors();
     void addDetector(Detector*, int = -1);
     void detectActions(Point&, int, Mat&);
     void clearQueues();
     void pointFound(const Point&);
     void pointNotFound();
-    Mat detectEyes(Mat&);
 
 signals:
     void updatePictureSignal(Mat);
@@ -65,7 +63,9 @@ public slots:
     void updatePicture();
     void startTimer(QTimer*, int);
     void stopTimer(QTimer*);
-
 };
+
+
+
 
 #endif // TRACKER_H

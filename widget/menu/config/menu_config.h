@@ -32,16 +32,12 @@ namespace Menu{
         QListWidget* commandList;
         QScrollBar* listScrollBar;
         Tracker* tracker;
-        QSlider* historySlider;
-        QSlider* kernelSlider;
-        QSlider* ratioSlider;
-        QSlider* thresholdSlider;
-        QSlider* queueSizeSlider;
         QLabel* historyLabel;
         QLabel* kernelLabel;
         QLabel* ratioLabel;
         QLabel* thresholdLabel;
         QLabel* queueSizeLabel;
+        QLabel* filePath;
         QLineEdit* cameraLineEdit;
         ClickableLabel* frameLabel;
 
@@ -58,6 +54,7 @@ namespace Menu{
         void setHistory(int);
         void setKernel(int);
         void setQueueSize(int);
+        void setEyeDetectorPath();
 
     };
 }

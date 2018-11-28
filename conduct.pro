@@ -48,7 +48,8 @@ SOURCES += \
     widget/menu/editor/menu_editor.cpp \
     widget/menu/config/menu_config.cpp \
     widget/menu/conductor/menu_difficulty.cpp \
-    conduct/module/random.cpp
+    conduct/module/random.cpp \
+    conduct/tracker/module/eyedector.cpp
 
 HEADERS += \
     conduct/conduct.h \
@@ -75,7 +76,9 @@ HEADERS += \
     widget/menu/editor/menu_editor.h \
     widget/menu/config/menu_config.h \
     widget/menu/conductor/menu_difficulty.h \
-    conduct/module/random.h
+    conduct/module/random.h \
+    conduct/tracker/module/eyedetector.h \
+    eyedetector/include/const.h
 
 FORMS += \
     widget/menu/conductor/conductor.ui \
@@ -95,8 +98,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 SUBDIRS += \
     conduct.pro
 
+INCLUDEPATH += C:/MinGW/include
 INCLUDEPATH += D:/opencv_3.2.0_32bit/build/include
-# INCLUDEPATH += D:/opencv_contrib/modules/face/include
 INCLUDEPATH += D:/FMOD/api/lowlevel/inc
 
 

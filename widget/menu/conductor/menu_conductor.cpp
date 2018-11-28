@@ -1,3 +1,4 @@
+#include "conduct/tracker/tracker.h"
 #include "menu_conductor.h"
 #include <QTimer>
 #include <QFileDialog>
@@ -9,7 +10,6 @@
 #include <QScrollBar>
 #include "widget/mainwindow.h"
 #include "ui_conductor.h"
-#include "conduct/tracker/tracker.h"
 #include "conduct/module/utility.h"
 #include "conduct/module/synctimer.h"
 #include "scoremaker.h"
@@ -149,6 +149,8 @@ namespace Menu{
 
     void Conductor::selectFile(){
         QString &&fileName = QFileDialog::getOpenFileName(parent, "Select xml", "./", "XML files (*.xml)");
+        if(fileName.isEmpty())
+            return;
         simulator->loadXML(fileName);
     }
 

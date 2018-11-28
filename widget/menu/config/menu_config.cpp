@@ -1,3 +1,4 @@
+#include "conduct/tracker/tracker.h"
 #include <QListWidget>
 #include <QLabel>
 #include <QPushButton>
@@ -5,11 +6,11 @@
 #include <QIntValidator>
 #include <QLineEdit>
 #include <QScrollBar>
+#include <QFileDialog>
 #include "menu_config.h"
 #include "widget/mainwindow.h"
 #include "widget/clickablelabel.h"
 #include "ui_config.h"
-#include "conduct/tracker/tracker.h"
 #include "conduct/module/utility.h"
 #include "conduct/command/command.h"
 
@@ -26,17 +27,19 @@ namespace Menu{
 
     void Configuration::setupUi(){
         ui->setupUi(parent);
-        historySlider = parent->findChild<QSlider*>("historySlider");
-        kernelSlider = parent->findChild<QSlider*>("kernelSlider");
-        ratioSlider = parent->findChild<QSlider*>("ratioSlider");
-        thresholdSlider = parent->findChild<QSlider*>("thresholdSlider");
-        queueSizeSlider = parent->findChild<QSlider*>("queueSizeSlider");
-        historyLabel = parent->findChild<QLabel*>("historyLabel");
-        kernelLabel = parent->findChild<QLabel*>("kernelLabel");
-        ratioLabel = parent->findChild<QLabel*>("ratioLabel");
-        thresholdLabel = parent->findChild<QLabel*>("thresholdLabel");
-        queueSizeLabel = parent->findChild<QLabel*>("queueSizeLabel");
-        cameraLineEdit = parent->findChild<QLineEdit*>("cameraLineEdit");
+        auto historySlider = parent->findChild<QSlider*>("historySlider");
+        auto kernelSlider = parent->findChild<QSlider*>("kernelSlider");
+        auto ratioSlider = parent->findChild<QSlider*>("ratioSlider");
+        auto thresholdSlider = parent->findChild<QSlider*>("thresholdSlider");
+        auto queueSizeSlider = parent->findChild<QSlider*>("queueSizeSlider");
+        this->historyLabel = parent->findChild<QLabel*>("historyLabel");
+        this->kernelLabel = parent->findChild<QLabel*>("kernelLabel");
+        this->ratioLabel = parent->findChild<QLabel*>("ratioLabel");
+        this->thresholdLabel = parent->findChild<QLabel*>("thresholdLabel");
+        this->queueSizeLabel = parent->findChild<QLabel*>("queueSizeLabel");
+        this->cameraLineEdit = parent->findChild<QLineEdit*>("cameraLineEdit");
+        this->filePath = parent->findChild<QLabel*>("pathLabel");
+        auto pathButton = parent->findChild<QPushButton*>("pathButton");
         historySlider->setValue(config.getHistory());
         kernelSlider->setValue(config.getKernel());
         thresholdSlider->setValue(config.getThreshold());
@@ -49,6 +52,7 @@ namespace Menu{
         queueSizeLabel->setText(QString::number(queueSizeSlider->value()));
         cameraLineEdit->setValidator(new QIntValidator(0, 10));
         cameraLineEdit->setText(QString::number(config.camNumber));
+        filePath->setText(config.getEyeDetectorPath());
         list = parent->findChild<QListWidget*>("listWidget");
         commandList = parent->findChild<QListWidget*>("commandListWidget");
         foreach(auto beat, Beats){
@@ -72,6 +76,7 @@ namespace Menu{
         connect(historySlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this, &Configuration::setHistory);
         connect(kernelSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this, &Configuration::setKernel);
         connect(queueSizeSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this, &Configuration::setQueueSize);
+        connect(pathButton, &QPushButton::clicked, this, &Configuration::setEyeDetectorPath);
         tracker->start();
     }
 
@@ -144,6 +149,15 @@ namespace Menu{
     void Configuration::setQueueSize(int value){
         config.setQueueSize(value);
         queueSizeLabel->setText(QString::number(value));
+    }
+
+    void Configuration::setEyeDetectorPath(){
+        QString fileName = QFileDialog::getOpenFileName(parent, "Set exe path", "./", tr("exe file (*.exe)"));
+        if(fileName.isEmpty())
+            return;
+        config.setEyeDetectorPath(fileName);
+        this->filePath->setText(fileName);
+        this->tracker->turnonEyeDetector();
     }
 
 }
