@@ -12,7 +12,12 @@
 extern const int THREAD_COUNT;
 extern Configuration config;
 
-const int SHIFT_RADIAN = 125;
+extern const int SHIFT_RADIAN;
+extern const int NUMERATOR_LOW;
+extern const int NUMERATOR_HIGH;
+extern const int DENOMINATOR;
+extern const int SIGN_RADIUS;
+
 
 using namespace cv;
 
@@ -31,6 +36,8 @@ public:
     void start();
     void stop();
     void turnonEyeDetector();
+    void setCurrentGroup(int);
+    int eyePosition;
 
 private:
     Ptr<BackgroundSubtractorMOG2> pMOG2;
@@ -46,6 +53,10 @@ private:
     Mat cameraNotOpened;
     Rect lastEyesPoint;
     EyeDetector* eyeDetector;
+    Mat borders;
+    Mat currentGroup;
+    QVector<Mat> currentEyesPosMat;
+    QVector<Mat> currentGroupMat;
     Point eyes;
     void prepareDetectors();
     void addDetector(Detector*, int = -1);
@@ -53,6 +64,9 @@ private:
     void clearQueues();
     void pointFound(const Point&);
     void pointNotFound();
+    void drawBorders(Mat);
+    void drawGroupSigns(Mat);
+    int currentEyesPosition(Mat);
 
 signals:
     void updatePictureSignal(Mat);

@@ -30,8 +30,10 @@ namespace Menu{
         this->tableWidget->horizontalHeader()->setStretchLastSection(true);
         this->typeComboBox = parent->findChild<QComboBox*>("typeComboBox");
         this->actionComboBox = parent->findChild<QComboBox*>("actionComboBox");
+        this->groupComboBox = parent->findChild<QComboBox*>("groupComboBox");
         this->musicTableWidget = parent->findChild<QTableWidget*>("musicTableWidget");
         this->musicTableWidget->setColumnWidth(MusicColumn::Main, 35);
+        this->musicTableWidget->setColumnWidth(MusicColumn::Group, 70);
         this->musicTableWidget->horizontalHeader()->setStretchLastSection(true);
         this->typeChanged(0);
         connect(parent->findChild<QAction*>("actionLoad"), &QAction::triggered, this, &Editor::load);
@@ -42,12 +44,16 @@ namespace Menu{
             this->refreshTable();
         });
         connect(parent->findChild<QPushButton*>("removeButton"), &QPushButton::clicked, this, &Editor::removeCommandRow);
-        connect(parent->findChild<QPushButton*>("toggleMainButton"), &QPushButton::clicked, this, &Editor::toggleMainMusic);
         connect(this->typeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &Editor::typeChanged);
         connect(this->actionComboBox, QOverload<int>::of(&QComboBox::activated), this, &Editor::setAction);
         connect(parent->findChild<QPushButton*>("addMusicButton"), &QPushButton::clicked, this, &Editor::addMusicFile);
         connect(parent->findChild<QPushButton*>("removeMusicButton"), &QPushButton::clicked, this, &Editor::removeMusicFile);
+        connect(parent->findChild<QPushButton*>("toggleMainButton"), &QPushButton::clicked, this, &Editor::toggleMainMusic);
+        connect(this->groupComboBox, QOverload<int>::of(&QComboBox::activated), this, &Editor::setMusicGroup);
         connect(parent->findChild<QPushButton*>("backButton"), &QPushButton::clicked, this, &Editor::back);
+        for(int i = 1; i <= GroupCount; ++i){
+            this->groupComboBox->addItem(QString::number(i));
+        }
     }
 
     void Editor::clear(){
@@ -87,14 +93,17 @@ namespace Menu{
     void Editor::typeChanged(int index){
         switch(index){
             case Type::Beat:
-            this->beatItem();
-            break;
+                this->beatItem();
+                break;
             case Type::Dynamics:
-            this->dynamicItem();
-            break;
+                this->dynamicItem();
+                break;
             case Type::Articulation:
-            this->articulationItem();
-            break;
+                this->articulationItem();
+                break;
+            case Type::Group:
+                this->groupItem();
+                break;
         }
     }
 
@@ -116,6 +125,13 @@ namespace Menu{
         this->actionComboBox->clear();
         foreach(auto item, Commands){
             this->actionComboBox->addItem(item);
+        }
+    }
+
+    void Editor::groupItem(){
+        this->actionComboBox->clear();
+        for(int i = 0; i <= GroupCount; ++i){
+            this->actionComboBox->addItem(QString::number(i));
         }
     }
 
@@ -191,17 +207,21 @@ namespace Menu{
         }
     }
 
-    void Editor::addMusicItem(const QString& name, bool isMain){
+    void Editor::addMusicItem(const QString& name, int group, bool isMain){
         int rowCount = this->musicTableWidget->rowCount();
         this->musicTableWidget->setRowCount(rowCount + 1);
         this->musicTableWidget->setItem(rowCount, MusicColumn::Main, new QTableWidgetItem(""));
+        this->musicTableWidget->setItem(rowCount, MusicColumn::Group, new QTableWidgetItem(""));
         this->musicTableWidget->setItem(rowCount, MusicColumn::Path, new QTableWidgetItem(""));
         auto mainItem = this->musicTableWidget->item(rowCount, MusicColumn::Main);
+        auto groupItem = this->musicTableWidget->item(rowCount, MusicColumn::Group);
         auto pathItem = this->musicTableWidget->item(rowCount, MusicColumn::Path);
         if(isMain)
             mainItem->setText("O");
         pathItem->setText(name);
+        groupItem->setText(QString::number(group));
         mainItem->setFlags(mainItem->flags() & ~Qt::ItemIsEditable);
+        groupItem->setFlags(groupItem->flags() & ~Qt::ItemIsEditable);
         pathItem->setFlags(pathItem->flags() & ~Qt::ItemIsEditable);
     }
 
@@ -227,6 +247,15 @@ namespace Menu{
             else{
                 item->setText("");
             }
+        }
+    }
+
+    void Editor::setMusicGroup(int){
+        int row = this->musicTableWidget->currentRow();
+        if(row != -1){
+            QString&& text = this->groupComboBox->currentText();
+            auto actionPtr = this->musicTableWidget->item(row, MusicColumn::Group);
+            actionPtr->setText(text);
         }
     }
 
@@ -277,12 +306,13 @@ namespace Menu{
                     return false;
             }
             else if(component.tagName() == "volume"){
-                if(!this->parseVolume(component))
-                    return false;
+                this->parseVolume(component);
             }
             else if(component.tagName() == "tempo"){
-                if(!this->parseTempo(component))
-                    return false;
+                this->parseTempo(component);
+            }
+            else if(component.tagName() == "group"){
+                this->parseGroup(component);
             }
             component = component.nextSibling().toElement();
         }
@@ -310,24 +340,30 @@ namespace Menu{
     bool Editor::parseMusic(const QDomElement& dom){
         QDomElement&& child = dom.firstChild().toElement();
         while(!child.isNull()){
-            if(child.text().isEmpty())
+            if(child.text().isEmpty() || !child.hasAttribute("main"))
                 return false;
-            this->addMusicItem(child.text(), child.attribute("main").toInt() != 0);
+            int group = child.attribute("group").toInt();
+            if(!(1 <= group && group <= GroupCount))
+                group = 1;
+            this->addMusicItem(child.text(), group, child.attribute("main").toInt() != 0);
             child = child.nextSibling().toElement();
         }
         return true;
     }
 
-    bool Editor::parseVolume(const QDomElement& dom){
+    void Editor::parseVolume(const QDomElement& dom){
         if(dom.text() != "0")
             parent->findChild<QCheckBox*>("volumeCheckBox")->setChecked(true);
-        return true;
     }
 
-    bool Editor::parseTempo(const QDomElement& dom){
+    void Editor::parseTempo(const QDomElement& dom){
         if(dom.text() != "0")
             parent->findChild<QCheckBox*>("tempoCheckBox")->setChecked(true);
-        return true;
+    }
+
+    void Editor::parseGroup(const QDomElement& dom){
+        if(dom.text() != "0")
+            parent->findChild<QCheckBox*>("groupCheckBox")->setChecked(true);
     }
 
     bool Editor::isSaveable(){
@@ -340,6 +376,12 @@ namespace Menu{
                 }
             }
         }
+        for(int row = 0; row < this->musicTableWidget->rowCount(); ++row){
+            if(this->musicTableWidget->item(row, MusicColumn::Group)->text().isEmpty()){
+                QMessageBox::critical(parent, "Error", "Specify a group number for music files");
+                return false;
+            }
+        }
         if(this->tableItemList.count() == 0){
             QMessageBox::critical(parent, "Error", "Add at least one item");
             return false;
@@ -348,6 +390,7 @@ namespace Menu{
             QMessageBox::critical(parent, "Error", "Add at least one music file");
             return false;
         }
+
         return true;
     }
 
@@ -393,17 +436,18 @@ namespace Menu{
         QDomElement &&root = document.createElement("conduct");
         QDomElement &&volume = document.createElement("volume");
         QDomElement &&tempo = document.createElement("tempo");
+        QDomElement &&group = document.createElement("group");
         QDomElement &&commands = document.createElement("commands");
         QDomElement &&musics = document.createElement("musics");
         document.appendChild(root);
         root.appendChild(volume);
         root.appendChild(tempo);
+        root.appendChild(group);
         root.appendChild(commands);
         root.appendChild(musics);
-        QDomText &&volumeFlag = document.createTextNode(QString::number(parent->findChild<QCheckBox*>("volumeCheckBox")->isChecked()));
-        volume.appendChild(volumeFlag);
-        QDomText &&tempoFlag = document.createTextNode(QString::number(parent->findChild<QCheckBox*>("tempoCheckBox")->isChecked()));
-        tempo.appendChild(tempoFlag);
+        volume.appendChild(document.createTextNode(QString::number(parent->findChild<QCheckBox*>("volumeCheckBox")->isChecked())));
+        tempo.appendChild(document.createTextNode(QString::number(parent->findChild<QCheckBox*>("tempoCheckBox")->isChecked())));
+        group.appendChild(document.createTextNode(QString::number(parent->findChild<QCheckBox*>("groupCheckBox")->isChecked())));
         foreach(auto list, this->tableItemList){
             QDomElement &&command = document.createElement("command");
             command.setAttribute("time", *list.at(CommandColumn::Time));
@@ -415,6 +459,9 @@ namespace Menu{
             QDomText &&path = document.createTextNode(this->musicTableWidget->item(row, MusicColumn::Path)->text());
             if(!this->musicTableWidget->item(row, MusicColumn::Main)->text().isEmpty())
                 music.setAttribute("main", "1");
+            else
+                music.setAttribute("main", "0");
+            music.setAttribute("group", this->musicTableWidget->item(row, MusicColumn::Group)->text());
             music.appendChild(path);
             musics.appendChild(music);
         }

@@ -28,7 +28,7 @@ public:
     void stop();
     void pause();
     void resume();
-    void setDynamic(Dynamic);
+    void setDynamic(Dynamic, int=0, int=0);
     void randomizeDynamic();
     void clear();
     const QQueue<SyncTimer*>* getTimers();
@@ -40,15 +40,18 @@ private:
     bool parseXML(const QDomDocument&);
     bool parseCommand(const QDomElement&);
     bool parseMusic(const QDomElement&);
-    bool parseVolume(const QDomElement&);
-    bool parseTempo(const QDomElement&);
+    void parseVolume(const QDomElement&);
+    void parseTempo(const QDomElement&);
+    void parseGroup(const QDomElement&);
     void addCommand(int, const QString&);
     void addDynamic(int, const QString&);
-    void addMusic(const QString&, bool = false);
-    void setVolume(int);
+    void addGroup(int, const QString&);
+    void addMusic(const QString&, int, bool = false);
+    void setVolume(int, int, int);
     MusicPlayer* musicPlayer;
     bool volumeChangeable;
     bool tempoChangeable;
+    bool groupEnabled;
 
 
 signals:
@@ -57,9 +60,11 @@ signals:
     void errorSignal(QString);
     void dynamicSignal(QString);
     void commandSignal(QString);
+    void groupSignal(int);
     void clearSignal();
     void endSignal();
     void tickSignal();
+    void groupEnabledSignal(bool);
 };
 
 #endif // XMLREADER_H

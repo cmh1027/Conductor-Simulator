@@ -9,7 +9,7 @@ extern const QSet<QString> Beats;
 extern const QSet<QString> Commands;
 extern const QMap<QString, Dynamic> DynamicMap;
 extern const QMap<QString, QString> Marks;
-
+extern const int GroupCount;
 namespace Command{
     extern const QString Vertical;
     extern const QString Horizontal;

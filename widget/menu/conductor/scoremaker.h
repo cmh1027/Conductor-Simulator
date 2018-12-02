@@ -20,6 +20,7 @@ private:
     void drawDynamic(QPainter&, const QString, int);
     void drawCommand(QPainter&, const QString, int);
     void drawBeat(QPainter&, const QString, int);
+    void drawGroup(QPainter&, const QString, int);
 };
 
 

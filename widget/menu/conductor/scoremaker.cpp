@@ -20,7 +20,9 @@ void MusicSheet::paintEvent(QPaintEvent*){
             this->drawBeat(painter, (*it)->command, (*it)->getTime() / (*it)->getTickInterval());
         else if(Dynamics.contains((*it)->command))
             this->drawDynamic(painter, (*it)->command, (*it)->getTime() / (*it)->getTickInterval());
-        else
+        else if(Commands.contains((*it)->command))
+            this->drawCommand(painter, (*it)->command, (*it)->getTime() / (*it)->getTickInterval());
+        else // group
             this->drawCommand(painter, (*it)->command, (*it)->getTime() / (*it)->getTickInterval());
     }
 
@@ -44,6 +46,10 @@ void MusicSheet::drawDynamic(QPainter& painter, const QString command, int x){
 void MusicSheet::drawBeat(QPainter& painter, const QString command, int x){
     painter.drawText(x * 3, height()/4, Marks[command]);
     painter.drawLine(x * 3, height()*3/8, x * 3, height()*5/8);
+}
+
+void MusicSheet::drawGroup(QPainter& painter, const QString command, int x){
+     painter.drawText(x * 3, height()*3/4, command);
 }
 
 

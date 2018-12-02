@@ -48,7 +48,9 @@ private:
     int energy;
     bool isPlaying;
     bool isPause;
+    bool groupEnabled;
     Dynamic dynamic;
+    int currentGroup;
     void checkVerticalDynamic(int);
     void checkHorizontalDynamic(int);
     Dynamic dynamicByVertical(int);
@@ -57,6 +59,7 @@ private:
     void commandSuccess(int);
     void commandFail();
     void beatFail();
+    void commandFail(int, int);
     bool checkDynamic(int, int, int);
     void setScore(int);
     void setEnergy(int);
@@ -83,8 +86,9 @@ public slots:
     void pause();
     void resume();
     void clear();
-    void addCommand(const QString&);
+    void addCommand(QString);
     void setDynamic(const QString&);
+    void setGroup(int);
     void removeCommand(const QString&);
     void removeCommand(const QString&, int);
 

@@ -8,6 +8,7 @@
 #include "fmod_errors.h"
 
 extern const int TickInterval;
+extern const int GroupCount;
 
 #define FMOD_FOREACH(mark, statement) \
     for(int mark = 0; mark < musicCount; ++mark){ \
@@ -49,7 +50,7 @@ class MusicPlayer : public QObject{
 public:
     MusicPlayer(uint);
     virtual ~MusicPlayer();
-    void addMusic(const QString&, int, bool = false);
+    void addMusic(const QString&, int, int, bool = false);
     void playAll();
     void stopAll();
     void pauseAll();
@@ -58,6 +59,7 @@ public:
     void rewind();
     int count() const;
     void setVolume(int, int);
+    void setVolumeGroup(int, int);
     void setVolumeAll(int);
     bool empty() const;
     void setSpeed(int, float);
@@ -66,7 +68,6 @@ public:
     void multSpeed(int, float);
     void multSpeedSpecific(int, float);
     void multSpeedAll(float);
-    void setMain(int);
 
 signals:
     void tickSignal();
@@ -79,6 +80,7 @@ private:
     QVector<int> volumes;
     QVector<float> speeds;
     QVector<int> mainSound;
+    QVector<QVector<int>> groups;
     FMOD_RESULT result;
     FMOD_DSP* dsp;
     uint tickInterval;

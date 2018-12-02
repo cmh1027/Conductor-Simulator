@@ -3,6 +3,7 @@
 #include <windows.h>
 #include "include/const.h"
 #include "include/detectEyes.hpp"
+#include <stdio.h>
 
 using namespace cv;
 using namespace cv::face;
@@ -24,12 +25,13 @@ int main(int argc, char *argv[]){
         HANDLE type_pipe; // int
         Pipes(){
             while(1){
-                mat_pipe = CONNECTPIPE((LPCSTR)MATNAME, GENERIC_READ);
+                mat_pipe = CONNECTPIPE(MATNAME, GENERIC_READ);
                 size_pipe = CONNECTPIPE(MATSIZENAME, GENERIC_READ);
                 eye_pipe = CONNECTPIPE(EYENAME, GENERIC_WRITE);
                 row_pipe = CONNECTPIPE(ROWNAME, GENERIC_READ);
                 col_pipe = CONNECTPIPE(COLNAME, GENERIC_READ);
                 type_pipe = CONNECTPIPE(TYPENAME, GENERIC_READ);
+                printf("%d %d %d %d %d %d\n", mat_pipe, size_pipe, eye_pipe, row_pipe, col_pipe, type_pipe);
                 if(mat_pipe != INVALID_HANDLE_VALUE && size_pipe != INVALID_HANDLE_VALUE && eye_pipe != INVALID_HANDLE_VALUE &&
                 row_pipe != INVALID_HANDLE_VALUE && col_pipe != INVALID_HANDLE_VALUE && type_pipe != INVALID_HANDLE_VALUE) 
                 break;

@@ -12,6 +12,12 @@
 #include "module/meanshift.h"
 #include "conduct/module/utility.h"
 
+const int SHIFT_RADIAN = 125;
+const int NUMERATOR_LOW = 11;
+const int NUMERATOR_HIGH = 13;
+const int DENOMINATOR = 24;
+const int SIGN_RADIUS = 5;
+
 
 Tracker::Tracker() : frameTimer(new QTimer()), inputTimer(new QTimer()),
     colorSelected(false), emptyFlag(0), haveLastPoint(false), eyeDetector(nullptr){
@@ -29,8 +35,6 @@ Tracker::Tracker() : frameTimer(new QTimer()), inputTimer(new QTimer()),
         }
     });
     inputTimer->setSingleShot(true);
-    this->cameraNotOpened = Mat::zeros(480, 640, CV_8UC3);
-    putText(this->cameraNotOpened, "Camera is not opened. Please set the camera in the configuration menu", Point(10, 20), 2, 0.4, Scalar::all(255));
     this->prepareDetectors();
 }
 
@@ -78,9 +82,16 @@ void Tracker::turnonEyeDetector(){
 void Tracker::start(){
     if(frameTimer->isActive())
         return;
+    Mat frame;
     frameTimer->start(20);
     inputTimer->start(1000);
     config.cameraOn();
+    config.readFrame(frame);
+    this->cameraNotOpened = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
+    this->currentGroup = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
+    putText(this->cameraNotOpened, "Camera is not opened. Please set the camera in the configuration menu", Point(10, 20), 2, 0.4, Scalar::all(255));
+    this->drawBorders(frame);
+    this->drawGroupSigns(frame);
     if(QFileInfo::exists(config.getEyeDetectorPath()))
         this->turnonEyeDetector();
 }
@@ -92,7 +103,8 @@ void Tracker::stop(){
     inputTimer->stop();
     this->clearQueues();
     config.cameraOff();
-    this->eyeDetector->stop();
+    if(this->eyeDetector != nullptr)
+        this->eyeDetector->stop();
 }
 
 
@@ -117,6 +129,7 @@ void Tracker::updatePicture(){
     Mat object;
     Mat colorMask;
     Mat actionCanvas;
+    Mat currentEyes;
     bool hsvExtension = false;
     config.readFrame(frame);
     actionCanvas = Mat::zeros(frame.rows, frame.cols, frame.type());
@@ -183,7 +196,11 @@ void Tracker::updatePicture(){
     this->detectActions(point, count, actionCanvas);
     cvtColor(frame, frame, COLOR_BGR2RGB);
     bitwise_or(frame, actionCanvas, frame);
-    circle(frame, this->eyes, 10, Scalar(0, 0, 255), -1);
+    bitwise_or(frame, this->borders, frame);
+    currentEyes = this->currentEyesPosMat.at(this->currentEyesPosition(frame));
+    bitwise_or(frame, currentEyes, frame);
+    bitwise_or(frame, this->currentGroup, frame);
+    circle(frame, this->eyes, 3, Scalar(0, 0, 255), -1);
     emit this->updatePictureSignal(frame);
 }
 
@@ -214,4 +231,99 @@ void Tracker::pointNotFound(){
     this->lastPoint.x = 0;
     this->lastPoint.y = 0;
     this->haveLastPoint = false;
+}
+
+void Tracker::drawBorders(Mat frame){
+    this->borders = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
+    int widthUnit = frame.cols / DENOMINATOR;
+    int heightUnit = frame.rows / 2;
+    line(this->borders, Point(widthUnit * NUMERATOR_LOW, 0), Point(widthUnit * NUMERATOR_LOW, frame.rows), Scalar(255, 0, 0));
+    line(this->borders, Point(widthUnit * NUMERATOR_HIGH, 0), Point(widthUnit * NUMERATOR_HIGH, frame.rows), Scalar(255, 0, 0));
+    line(this->borders, Point(0, heightUnit), Point(widthUnit * NUMERATOR_LOW, heightUnit), Scalar(255, 0, 0));
+    line(this->borders, Point(widthUnit * NUMERATOR_HIGH, heightUnit), Point(frame.cols, heightUnit), Scalar(255, 0, 0));
+    this->currentEyesPosMat.clear();
+    Mat mat_empty = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
+    // (0)
+    Mat mat = mat_empty.clone();
+    line(mat, Point(widthUnit * NUMERATOR_LOW, 0), Point(widthUnit * NUMERATOR_LOW, frame.rows), Scalar(0, 0, 255));
+    line(mat, Point(widthUnit * NUMERATOR_HIGH, 0), Point(widthUnit * NUMERATOR_HIGH, frame.rows), Scalar(0, 0, 255));
+    this->currentEyesPosMat.push_back(mat);
+    // (1)
+    mat = mat_empty.clone();
+    line(mat, Point(0, heightUnit), Point(widthUnit * NUMERATOR_LOW, heightUnit), Scalar(0, 0, 255));
+    line(mat, Point(widthUnit * NUMERATOR_LOW, 0), Point(widthUnit * NUMERATOR_LOW, heightUnit), Scalar(0, 0, 255));
+    this->currentEyesPosMat.push_back(mat);
+    // (2)
+    mat = mat_empty.clone();
+    line(mat, Point(widthUnit * NUMERATOR_HIGH, 0), Point(widthUnit * NUMERATOR_HIGH, heightUnit), Scalar(0, 0, 255));
+    line(mat, Point(widthUnit * NUMERATOR_HIGH, heightUnit), Point(frame.cols, heightUnit), Scalar(0, 0, 255));
+    this->currentEyesPosMat.push_back(mat);
+    // (3)
+    mat = mat_empty.clone();
+    line(mat, Point(0, heightUnit), Point(widthUnit * NUMERATOR_LOW, heightUnit), Scalar(0, 0, 255));
+    line(mat, Point(widthUnit * NUMERATOR_LOW, heightUnit), Point(widthUnit * NUMERATOR_LOW, frame.rows), Scalar(0, 0, 255));
+    this->currentEyesPosMat.push_back(mat);
+    // (4)
+    mat = mat_empty.clone();
+    line(mat, Point(widthUnit * NUMERATOR_HIGH, heightUnit), Point(widthUnit * NUMERATOR_HIGH, frame.rows), Scalar(0, 0, 255));
+    line(mat, Point(widthUnit * NUMERATOR_HIGH, heightUnit), Point(frame.cols, heightUnit), Scalar(0, 0, 255));
+    this->currentEyesPosMat.push_back(mat);
+}
+
+void Tracker::drawGroupSigns(Mat frame){
+    int widthUnit = frame.cols / DENOMINATOR;
+    int heightUnit = frame.rows / 2;
+    this->currentGroupMat.clear();
+    Mat mat_empty = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
+    // (0)
+    Mat mat = mat_empty.clone();
+    circle(mat, Point(widthUnit * NUMERATOR_LOW + SIGN_RADIUS, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    this->currentGroupMat.push_back(mat);
+    // (1)
+    mat = mat_empty.clone();
+    circle(mat, Point(SIGN_RADIUS + SIGN_RADIUS, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    this->currentGroupMat.push_back(mat);
+    // (2)
+    mat = mat_empty.clone();
+    circle(mat, Point(SIGN_RADIUS + widthUnit * NUMERATOR_HIGH + SIGN_RADIUS, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    this->currentGroupMat.push_back(mat);
+    // (3)
+    mat = mat_empty.clone();
+    circle(mat, Point(SIGN_RADIUS + SIGN_RADIUS, SIGN_RADIUS + heightUnit), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    this->currentGroupMat.push_back(mat);
+    // (4)
+    mat = mat_empty.clone();
+    circle(mat, Point(SIGN_RADIUS + widthUnit * NUMERATOR_HIGH + SIGN_RADIUS, SIGN_RADIUS + heightUnit), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    this->currentGroupMat.push_back(mat);
+}
+
+int Tracker::currentEyesPosition(Mat frame){
+    int widthUnit = frame.cols / DENOMINATOR;
+    int heightUnit = frame.rows / 2;
+    int pos;
+    if(widthUnit * NUMERATOR_LOW < this->eyes.x && this->eyes.x < widthUnit * NUMERATOR_HIGH){
+        pos = 0;
+    }
+    else if(this->eyes.x <= widthUnit * NUMERATOR_LOW){
+        if(this->eyes.y <= heightUnit)
+            pos = 1;
+        else
+            pos = 3;
+    }
+    else{
+        if(this->eyes.y <= heightUnit)
+            pos = 2;
+        else
+            pos = 4;
+    }
+    this->eyePosition = pos;
+    return pos;
+}
+
+void Tracker::setCurrentGroup(int group){
+    Q_ASSERT(group < this->currentGroupMat.size());
+    if(group == -1)
+        this->currentGroup = Mat::zeros(this->currentGroup.rows, this->currentGroup.cols, CV_8UC3);
+    else
+        this->currentGroup = this->currentGroupMat.at(group);
 }

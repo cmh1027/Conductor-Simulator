@@ -1,7 +1,7 @@
-#ifndef _CONST_H_
-#define _CONST_H_
+#ifndef CONST_H_
+#define CONST_H_
 #define CONNECTPIPE(NAME, mode) \
-    CreateFile((LPCSTR)NAME, mode, 0, NULL, OPEN_EXISTING, 0, NULL);
+    CreateFileW(NAME, mode, 0, NULL, OPEN_EXISTING, 0, NULL);
 
 #define MATNAME L"\\\\.\\pipe\\frame"
 #define MATSIZENAME L"\\\\.\\pipe\\framesize"

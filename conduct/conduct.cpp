@@ -1,6 +1,7 @@
 #include <QString>
 #include <QTimer>
 #include <cmath>
+#include <iostream>
 #include "conduct.h"
 #include "xmlReader/xmlreader.h"
 #include "module/synctimer.h"
@@ -19,7 +20,7 @@ const QMap<Dynamic, int> maxHorizontalDistance = {{Dynamic::pp, 170}, {Dynamic::
 
 
 ConductSimulator::ConductSimulator() : tracker(nullptr), lastTimer(new SyncTimer(TickInterval)),
-    startTimer(new CountDownTimer()), score(0), energy(0), isPlaying(false), isPause(false), dynamic(None){
+    startTimer(new CountDownTimer()), score(0), energy(0), isPlaying(false), isPause(false), groupEnabled(false), dynamic(None){
     this->setDifficulty(Difficulty::Normal);
     xmlReader = new XMLReader(this->interval);
     connect(xmlReader, &XMLReader::tickSignal, this, [=]{
@@ -41,10 +42,14 @@ ConductSimulator::ConductSimulator() : tracker(nullptr), lastTimer(new SyncTimer
     });
     connect(xmlReader, &XMLReader::commandSignal, this, &ConductSimulator::addCommand);
     connect(xmlReader, &XMLReader::dynamicSignal, this, &ConductSimulator::setDynamic);
+    connect(xmlReader, &XMLReader::groupSignal, this, &ConductSimulator::setGroup);
     connect(xmlReader, &XMLReader::clearSignal, this, &ConductSimulator::initSignal);
     connect(xmlReader, &XMLReader::endSignal, this, [=]{
         lastTimer->setTime(this->interval * 2 + LastInterval);
         lastTimer->rewind();
+    });
+    connect(xmlReader, &XMLReader::groupEnabledSignal, this, [=](bool isEnabled){
+        this->groupEnabled = isEnabled;
     });
     connect(lastTimer, &SyncTimer::timeout, this, [=]{
         this->isPlaying = false;
@@ -110,6 +115,11 @@ void ConductSimulator::gameStart(){
         return;
     }
     this->dynamic = None;
+    this->currentGroup = 0;
+    if(this->groupEnabled)
+        this->tracker->setCurrentGroup(this->currentGroup);
+    else
+        this->tracker->setCurrentGroup(-1);
     this->setScore(0);
     this->setEnergy(MaxEnergy);
     this->clearCommands();
@@ -172,7 +182,8 @@ void ConductSimulator::clearCommands(){
     mutex.unlock();
 }
 
-void ConductSimulator::addCommand(const QString& command){
+void ConductSimulator::addCommand(QString command){
+    std::cout << "check " << command.toStdString() << std::endl;
     mutex.lock();
     if(!this->waitingCommands.contains(command)){
         this->waitingCommands.insert(command, new QQueue<SyncTimer*>());
@@ -203,13 +214,22 @@ void ConductSimulator::setDynamic(const QString& dynamic){
     xmlReader->setDynamic(this->dynamic);
 }
 
+void ConductSimulator::setGroup(int group){
+    this->currentGroup = group;
+    if(this->groupEnabled)
+        this->tracker->setCurrentGroup(group);
+}
+
 void ConductSimulator::removeCommand(const QString& command){
     mutex.lock();
     if(this->waitingCommands.contains(command)){
         if(this->waitingCommands.value(command)->count() > 0){
             auto timer = this->waitingCommands.value(command)->dequeue();
             if(timer->tryLock()){
-                this->commandSuccess(timer->remainingTime());
+                if((this->groupEnabled && this->currentGroup == tracker->eyePosition) || !this->groupEnabled)
+                    this->commandSuccess(timer->remainingTime());
+                else
+                    this->commandFail(this->currentGroup, tracker->eyePosition);
                 timer->deleteLater();
             }
         }
@@ -223,12 +243,15 @@ void ConductSimulator::removeCommand(const QString& command, int distance){
         if(this->waitingCommands.value(command)->count() > 0){
             auto timer = this->waitingCommands.value(command)->dequeue();
             if(timer->tryLock()){
-                this->commandSuccess(timer->remainingTime());
-                timer->deleteLater();
+                if((this->groupEnabled && this->currentGroup == tracker->eyePosition) || !this->groupEnabled)
+                    this->commandSuccess(timer->remainingTime());
+                else
+                    this->commandFail(this->currentGroup, tracker->eyePosition);
                 if(command == Command::Vertical)
                     this->checkVerticalDynamic(distance);
                 else if(command == Command::Horizontal)
                     this->checkHorizontalDynamic(distance);
+                timer->deleteLater();
             }
         }
     }
@@ -270,6 +293,15 @@ void ConductSimulator::commandFail(){
     emit this->commandSignal(Precision::Fail);
 }
 
+
+void ConductSimulator::commandFail(int originGroup, int currentGroup){
+    this->addScore(-50);
+    this->addEnergy(-7);
+    emit this->commandSignal(Precision::Fail);
+}
+
+
+
 bool ConductSimulator::checkDynamic(int distance, int min, int max){
     int error = std::min(std::abs(distance - min), std::abs(distance - max));
     double precision = static_cast<double>(error) / (max - min);
@@ -303,22 +335,34 @@ bool ConductSimulator::checkDynamic(int distance, int min, int max){
 void ConductSimulator::checkVerticalDynamic(int distance){
     if(this->dynamic == Dynamic::None)
         return;
+    int group1 = 0;
+    int group2 = 0;
+    if(this->groupEnabled && this->currentGroup != tracker->eyePosition){
+        group1 = this->currentGroup;
+        group2 = tracker->eyePosition;
+    }
     if(this->checkDynamic(distance, minVerticalDistance[this->dynamic], maxVerticalDistance[this->dynamic]))
-        xmlReader->setDynamic(this->dynamic);
+        xmlReader->setDynamic(this->dynamic, group1, group2);
     else{
         if(Random::percent(DifProb[this->difficulty]))
-            xmlReader->setDynamic(this->dynamicByVertical(distance));
+            xmlReader->setDynamic(this->dynamicByVertical(distance), group1, group2);
     }
 }
 
 void ConductSimulator::checkHorizontalDynamic(int distance){
     if(this->dynamic == Dynamic::None)
         return;
+    int group1 = 0;
+    int group2 = 0;
+    if(this->groupEnabled && this->currentGroup != tracker->eyePosition){
+        group1 = this->currentGroup;
+        group2 = tracker->eyePosition;
+    }
     if(this->checkDynamic(distance, minHorizontalDistance[this->dynamic], maxHorizontalDistance[this->dynamic]))
-        xmlReader->setDynamic(this->dynamic);
+        xmlReader->setDynamic(this->dynamic, group1, group2);
     else{
         if(Random::percent(DifProb[this->difficulty]))
-            xmlReader->setDynamic(this->dynamicByHorizontal(distance));
+            xmlReader->setDynamic(this->dynamicByHorizontal(distance), group1, group2);
     }
 }
 

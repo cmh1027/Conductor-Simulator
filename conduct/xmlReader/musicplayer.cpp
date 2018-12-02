@@ -11,6 +11,9 @@ MusicPlayer::MusicPlayer(uint tickInterval) : musicCount(0), system(nullptr),
     FMOD_System_Init(system, 320, FMOD_INIT_NORMAL, nullptr);
     FMOD_System_CreateDSPByType(system, FMOD_DSP_TYPE_PITCHSHIFT, &dsp);
     connect(timer, &MusicTimer::tickSignal, this, &MusicPlayer::tickSignal);
+    for(int i = 0; i < GroupCount; ++i){
+        groups.append(QVector<int>());
+    }
 }
 
 MusicPlayer::~MusicPlayer(){
@@ -22,7 +25,7 @@ MusicPlayer::~MusicPlayer(){
     FMOD_System_Release(system);
 }
 
-void MusicPlayer::addMusic(const QString& path, int volume, bool isMain){
+void MusicPlayer::addMusic(const QString& path, int volume, int group, bool isMain){
     ++musicCount;
     sound.append(nullptr);
     channel.append(nullptr);
@@ -31,8 +34,9 @@ void MusicPlayer::addMusic(const QString& path, int volume, bool isMain){
     FMOD_System_CreateSound(system, path.toStdString().c_str(), FMOD_LOOP_OFF | FMOD_2D, nullptr, &sound[musicCount-1]);
     FMOD_Channel_SetVolume(channel[musicCount-1], VOLUME(volume));
     volumes[musicCount - 1] = volume;
+    groups[group - 1].append(musicCount - 1);
     if(isMain)
-        this->setMain(musicCount - 1);
+        mainSound.append(musicCount - 1);
 
 }
 
@@ -74,6 +78,9 @@ void MusicPlayer::clear(){
     volumes.clear();
     speeds.clear();
     mainSound.clear();
+    for(int i = 0; i < GroupCount; ++i){
+        groups[i].clear();
+    }
     musicCount = 0;
 }
 
@@ -94,6 +101,19 @@ void MusicPlayer::setVolume(int index, int volume){
     }
     else
         FMOD_Channel_SetVolume(channel[index], VOLUME(volume));
+}
+
+void MusicPlayer::setVolumeGroup(int group, int volume){
+    Q_ASSERT(group < groups.size());
+    foreach(auto index, groups[group]){
+        if(mainSound.contains(index)){
+            foreach(int number, mainSound){
+                FMOD_Channel_SetVolume(channel[number], VOLUME(volume));
+            }
+        }
+        else
+            FMOD_Channel_SetVolume(channel[index], VOLUME(volume));
+    }
 }
 
 void MusicPlayer::setVolumeAll(int volume){
@@ -150,11 +170,6 @@ void MusicPlayer::multSpeedAll(float speed){
     FMOD_FOREACH(i, FMOD_DSP_SetParameterFloat(dsp, 0, 1/speeds[i]);
                     FMOD_Channel_SetPitch(channel[i], speeds[i]);
                     FMOD_Channel_AddDSP(channel[i], 0, dsp));
-}
-
-void MusicPlayer::setMain(int index){
-    Q_ASSERT(index < musicCount);
-    mainSound.append(index);
 }
 
 

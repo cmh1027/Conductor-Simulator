@@ -7,6 +7,7 @@
 #include "eyedetector/include/const.h"
 #define CREATEPIPE(NAME, dwOenMode, size) \
     CreateNamedPipe(NAME, dwOenMode, PIPE_READMODE_BYTE | PIPE_WAIT, PIPE_UNLIMITED_INSTANCES, size, size, NMPWAIT_USE_DEFAULT_WAIT, nullptr);
+
 using namespace cv;
 
 class EyeDetector : public QThread{
@@ -18,6 +19,7 @@ public:
    void reconnect();
    void stop();
    void detectEyes(Mat);
+   void start() = delete;
 
 
 private:
@@ -38,6 +40,7 @@ private:
    HANDLE type_pipe; // int
    Point* eyes;
    Mat frame;
+   PROCESS_INFORMATION pi;
 };
 
 #endif // EYEDETECTOR_H

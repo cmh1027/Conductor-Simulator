@@ -1,12 +1,15 @@
 #include <QSet>
 #include <QtXml>
 #include <QFileInfo>
+#include <iostream>
 #include "conduct/module/synctimer.h"
 #include "conduct/module/precisetimer.h"
 #include "conduct/command/command.h"
 #include "conduct/module/random.h"
 #include "xmlreader.h"
+
 const int TickInterval = 100;
+
 XMLReader::XMLReader(int interval) : interval(interval), timeoutCount(0), musicPlayer(new MusicPlayer(TickInterval)),
     volumeChangeable(false), tempoChangeable(false)
 {
@@ -106,14 +109,13 @@ bool XMLReader::parseXML(const QDomDocument& document){
             }
         }
         else if(component.tagName() == "volume"){
-            if(!this->parseVolume(component)){
-                return false;
-            }
+            this->parseVolume(component);
         }
         else if(component.tagName() == "tempo"){
-            if(!this->parseTempo(component)){
-                return false;
-            }
+            this->parseTempo(component);
+        }
+        else if(component.tagName() == "group"){
+            this->parseGroup(component);
         }
         component = component.nextSibling().toElement();
     }
@@ -134,8 +136,10 @@ bool XMLReader::parseCommand(const QDomElement& dom){
         QString&& action = child.attribute("action");
         if(Dynamics.contains(action))
             this->addDynamic(static_cast<int>(time * 1000), action);
-        else
+        else if(Commands.contains(action))
             this->addCommand(static_cast<int>(time * 1000), action);
+        else // group
+            this->addGroup(static_cast<int>(time * 1000), action);
         child = child.nextSibling().toElement();
         ++count;
     }
@@ -159,7 +163,10 @@ bool XMLReader::parseMusic(const QDomElement& dom){
         if(fileInfo.exists() && fileInfo.isFile()){
             emit this->infoSignal(QString("Load file %1").arg(path));
             bool isMain = child.attribute("main").toInt() != 0;
-            this->addMusic(path, isMain);
+            int group = child.attribute("group").toInt();
+            if(!(1 <= group && group <= GroupCount))
+                group = 1;
+            this->addMusic(path, group, isMain);
             if(isMain)
                 ++mainCount;
             ++musicCount;
@@ -179,25 +186,32 @@ bool XMLReader::parseMusic(const QDomElement& dom){
     return true;
 }
 
-bool XMLReader::parseVolume(const QDomElement& dom){
+void XMLReader::parseVolume(const QDomElement& dom){
     if(dom.text() != "0")
         this->volumeChangeable = true;
     else
         this->volumeChangeable = false;
-    return true;
 }
 
-bool XMLReader::parseTempo(const QDomElement& dom){
+void XMLReader::parseTempo(const QDomElement& dom){
     if(dom.text() != "0")
         this->tempoChangeable = true;
     else
         this->tempoChangeable = false;
-    return true;
+}
+
+void XMLReader::parseGroup(const QDomElement& dom){
+    if(dom.text() != "0")
+        this->groupEnabled = true;
+    else
+        this->groupEnabled = false;
+    emit this->groupEnabledSignal(this->groupEnabled);
 }
 
 void XMLReader::addCommand(int time, const QString& command){
     SyncTimer* timer = new SyncTimer(time, this->interval, TickInterval, command);
     connect(timer, &SyncTimer::timeout, this, [=](){
+        std::cout << command.toStdString() << std::endl;
         emit this->commandSignal(timer->command);
         this->timeoutCount += 1;
         if(this->timeoutCount == this->timers.count()){
@@ -219,40 +233,59 @@ void XMLReader::addDynamic(int time, const QString& dynamic){
     this->timers.enqueue(timer);
 }
 
-
-void XMLReader::addMusic(const QString& path, bool isMain){
-    this->musicPlayer->addMusic(path, 50, isMain);
+void XMLReader::addGroup(int time, const QString& group){
+    SyncTimer* timer = new SyncTimer(time, this->interval, TickInterval, group);
+    connect(timer, &SyncTimer::timeout, this, [=](){
+        int groupNum = timer->command.toInt();
+        if(!(0 <= groupNum && groupNum <= GroupCount))
+            groupNum = 0;
+        emit this->groupSignal(groupNum);
+        this->timeoutCount += 1;
+        if(this->timeoutCount == this->timers.count()){
+            emit this->endSignal();
+        }
+    });
+    this->timers.enqueue(timer);
 }
 
 
-void XMLReader::setVolume(int volume){
-    this->musicPlayer->setVolumeAll(volume);
+void XMLReader::addMusic(const QString& path, int group, bool isMain){
+    this->musicPlayer->addMusic(path, 50, group, isMain);
 }
 
-void XMLReader::setDynamic(Dynamic dynamic){
+void XMLReader::setVolume(int volume, int group1, int group2){
+    if(group1 == 0 || group2 == 0)
+        this->musicPlayer->setVolumeAll(volume);
+    else{
+        this->musicPlayer->setVolumeGroup(volume, group1-1);
+        this->musicPlayer->setVolumeGroup(volume, group2-1);
+    }
+}
+
+void XMLReader::setDynamic(Dynamic dynamic, int group1, int group2){
     if(!this->volumeChangeable)
         return;
     switch(dynamic){
         case pp:
-            this->setVolume(15);
+            this->setVolume(15, group1, group2);
             break;
         case p:
-            this->setVolume(30);
+            this->setVolume(30, group1, group2);
             break;
         case mp:
-            this->setVolume(45);
+            this->setVolume(45, group1, group2);
             break;
         case mf:
-            this->setVolume(60);
+            this->setVolume(60, group1, group2);
             break;
         case f:
-            this->setVolume(75);
+            this->setVolume(75, group1, group2);
             break;
         case ff:
-            this->setVolume(90);
+            this->setVolume(90, group1, group2);
             break;
         default:
-            this->setVolume(50);
+            this->setVolume(50, group1, group2);
             break;
     }
 }

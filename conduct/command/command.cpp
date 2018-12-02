@@ -34,3 +34,5 @@ const QMap<QString, QString> Marks = {{Command::Vertical, "V"}, {Command::Horizo
                                       {Command::p, "p"}, {Command::pp, "pp"}, {Command::Accent, ">"},
                                       {Command::ShortAccent, "≥"}, {Command::ReverseAccent, "｜"},
                                       {Command::Staccato, "•"}};
+
+const int GroupCount = 4;

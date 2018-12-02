@@ -19,10 +19,10 @@ namespace Ui {
 }
 
 namespace Type{
-    typedef enum {Beat, Dynamics, Articulation} Type;
+    typedef enum {Beat, Dynamics, Articulation, Group} Type;
 }
 typedef enum {Number, Time, Action} CommandColumn;
-typedef enum {Main, Path} MusicColumn;
+typedef enum {Main, Group, Path} MusicColumn;
 
 namespace Menu{
     class Editor : public Menu::Menu
@@ -39,6 +39,7 @@ namespace Menu{
             QTableWidget* tableWidget;
             QComboBox* typeComboBox;
             QComboBox* actionComboBox;
+            QComboBox* groupComboBox;
             QTableWidget* musicTableWidget;
             QList<QList<QString*>> tableItemList;
             QString filePath;
@@ -50,13 +51,15 @@ namespace Menu{
             void beatItem();
             void dynamicItem();
             void articulationItem();
-            void addMusicItem(const QString&, bool = false);
+            void groupItem();
+            void addMusicItem(const QString&, int group = 1, bool = false);
             bool isSaveable();
             bool parseXML(const QDomDocument&);
             bool parseCommand(const QDomElement&);
             bool parseMusic(const QDomElement&);
-            bool parseVolume(const QDomElement&);
-            bool parseTempo(const QDomElement&);
+            void parseVolume(const QDomElement&);
+            void parseTempo(const QDomElement&);
+            void parseGroup(const QDomElement&);
             bool saveXML(const QString&, QDomDocument&);
             void constructXML(QDomDocument&);
 
@@ -70,6 +73,7 @@ namespace Menu{
             void addCommandRow(const QString&, const QString&, const QString&);
             void removeCommandRow();
             void toggleMainMusic();
+            void setMusicGroup(int);
             void setAction(int);
             void addMusicFile();
             void removeMusicFile();

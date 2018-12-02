@@ -22,11 +22,17 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="leftMargin">
+     <number>10</number>
+    </property>
     <property name="topMargin">
-     <number>5</number>
+     <number>10</number>
+    </property>
+    <property name="rightMargin">
+     <number>10</number>
     </property>
     <property name="bottomMargin">
-     <number>5</number>
+     <number>10</number>
     </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -65,6 +71,22 @@
         </property>
         <property name="text">
          <string>Change Tempo</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="groupCheckBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>Enable group</string>
         </property>
        </widget>
       </item>
@@ -210,6 +232,11 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
           <string>Articulation</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Group</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -251,6 +278,11 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
       </column>
       <column>
        <property name="text">
+        <string>Group</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>Path</string>
        </property>
       </column>
@@ -265,7 +297,7 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
        <number>0</number>
       </property>
       <property name="rightMargin">
-       <number>0</number>
+       <number>15</number>
       </property>
       <property name="bottomMargin">
        <number>0</number>
@@ -336,6 +368,38 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
         </property>
         <property name="text">
          <string>Set / Unset Main</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="maximumSize">
+         <size>
+          <width>40</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Group</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="groupComboBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QComboBox{background-color: rgb(212, 212, 212);}</string>
         </property>
        </widget>
       </item>

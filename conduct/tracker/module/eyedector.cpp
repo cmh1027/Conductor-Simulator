@@ -1,4 +1,5 @@
 #include "eyedetector.h"
+#include <iostream>
 EyeDetector::EyeDetector(){}
 
 EyeDetector::~EyeDetector(){
@@ -19,7 +20,7 @@ void EyeDetector::set(Mat frame, const QString& path, Point* eyes){
 void EyeDetector::detectEyes(Mat frame){
     if(!this->isRunning()){
         this->frame = frame;
-        this->start();
+        QThread::start();
     }
 }
 
@@ -55,7 +56,6 @@ void EyeDetector::connect(){
     col_pipe = CREATEPIPE(COLNAME, PIPE_ACCESS_OUTBOUND, sizeof(int));
     type_pipe = CREATEPIPE(TYPENAME, PIPE_ACCESS_OUTBOUND, sizeof(int));
     STARTUPINFO si;
-    PROCESS_INFORMATION pi;
     memset(&si, 0, sizeof(si));
     memset(&pi, 0, sizeof(pi));
     si.cb = sizeof(si);
@@ -82,7 +82,7 @@ void EyeDetector::connect(){
 
 void EyeDetector::reconnect(){
     stop();
-    start();
+    QThread::start();
 }
 
 void EyeDetector::stop(){
@@ -92,4 +92,6 @@ void EyeDetector::stop(){
     CloseHandle(row_pipe);
     CloseHandle(col_pipe);
     CloseHandle(type_pipe);
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
 }
