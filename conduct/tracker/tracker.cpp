@@ -19,7 +19,7 @@ const int DENOMINATOR = 24;
 const int SIGN_RADIUS = 5;
 
 
-Tracker::Tracker() : frameTimer(new QTimer()), inputTimer(new QTimer()),
+Tracker::Tracker() : groupEnabled(false), frameTimer(new QTimer()), inputTimer(new QTimer()),
     colorSelected(false), emptyFlag(0), haveLastPoint(false), eyeDetector(nullptr){
     pMOG2 = createBackgroundSubtractorMOG2(25, 16, false);
     connect(frameTimer, &QTimer::timeout, this, [this](){
@@ -77,6 +77,7 @@ void Tracker::turnonEyeDetector(){
     config.readFrame(frame);
     this->eyeDetector = EyeDetector::getInstance(frame, config.getEyeDetectorPath(), &eyes);
     this->eyeDetector->connect();
+    this->groupEnabled = true;
 }
 
 void Tracker::start(){
@@ -114,34 +115,22 @@ void Tracker::clearQueues(){
     }
 }
 
-
-
-void Tracker::updatePicture(){
-    if(!config.isCamOpened()){
-        emit this->updatePictureSignal(this->cameraNotOpened);
-        return;
-    }
-    Mat frame;
+Mat Tracker::subtractBackground(Mat frame){
     Mat mogMask;
     Mat moving;
-    Mat hsv;
-    Mat result;
-    Mat object;
-    Mat colorMask;
-    Mat actionCanvas;
-    Mat currentEyes;
-    bool hsvExtension = false;
-    config.readFrame(frame);
-    actionCanvas = Mat::zeros(frame.rows, frame.cols, frame.type());
-    flip(frame, frame, 1);
-    if(this->eyeDetector != nullptr)
-        this->eyeDetector->detectEyes(frame);
     pMOG2->apply(frame, mogMask);
     morphologyEx(mogMask, mogMask, CV_MOP_ERODE, getStructuringElement(MORPH_ELLIPSE, Size(config.getKernel(), config.getKernel())));
     morphologyEx(mogMask, mogMask, CV_MOP_DILATE, getStructuringElement(MORPH_ELLIPSE, Size(config.getKernel(), config.getKernel())));
     threshold(mogMask, mogMask, config.getThreshold(), 255, THRESH_BINARY);
     cvtColor(mogMask, mogMask, COLOR_GRAY2BGR);
     bitwise_and(frame, mogMask, moving);
+    return moving;
+}
+
+Mat Tracker::detectColoredObject(Mat moving, bool& hsvExtension){
+    Mat hsv;
+    Mat colorMask;
+    Mat colored;
     cvtColor(moving, hsv, COLOR_BGR2HSV);
     inRange(hsv, config.getLowerBound(), config.getUpperBound(), colorMask);
     if(countNonZero(colorMask) == 0){
@@ -149,8 +138,6 @@ void Tracker::updatePicture(){
             inRange(hsv, config.getWideLowerBound(), config.getWideUpperBound(), colorMask);
             if(countNonZero(colorMask) != 0){
                 colorMask = remainPixelsInCircle(this->lastPoint, SHIFT_RADIAN, colorMask);
-            }
-            if(countNonZero(colorMask) != 0){
                 hsvExtension = true;
             }
         }
@@ -159,12 +146,18 @@ void Tracker::updatePicture(){
         this->pointNotFound();
     }
     cvtColor(colorMask, colorMask, COLOR_GRAY2BGR);
-    bitwise_and(moving, colorMask, result);
-    morphologyEx(result, result, CV_MOP_ERODE, getStructuringElement(MORPH_ELLIPSE,Size(3, 3)));
+    bitwise_and(moving, colorMask, colored);
+    morphologyEx(colored, colored, CV_MOP_ERODE, getStructuringElement(MORPH_ELLIPSE,Size(3, 3)));
+    return colored;
+}
+
+Mat Tracker::detectActions(Mat frame, Mat colored, bool hsvExtension){
+    Point point;
+    Mat object;
+    Mat actionCanvas = Mat::zeros(frame.rows, frame.cols, frame.type());
     QSet<QPair<int, int>> dataPixels;
     QSet<QPair<int, int>> objectPixels;
-    Point point;
-    findDataPixels(result, dataPixels);
+    findDataPixels(colored, dataPixels);
     if(dataPixels.size() != 0){
         if(this->haveLastPoint)
             meanShift(dataPixels, this->lastPoint);
@@ -192,15 +185,37 @@ void Tracker::updatePicture(){
     }
     int count = objectPixels.size();
     if(count > 0)
-        circle(actionCanvas, point, 10, Scalar(255, 0, 0), 2);
+        circle(actionCanvas, point, 10, Scalar(0, 0, 255), 2);
     this->detectActions(point, count, actionCanvas);
-    cvtColor(frame, frame, COLOR_BGR2RGB);
     bitwise_or(frame, actionCanvas, frame);
-    bitwise_or(frame, this->borders, frame);
-    currentEyes = this->currentEyesPosMat.at(this->currentEyesPosition(frame));
-    bitwise_or(frame, currentEyes, frame);
+    return frame;
+}
+
+void Tracker::updatePicture(){
+    if(!config.isCamOpened()){
+        emit this->updatePictureSignal(this->cameraNotOpened);
+        return;
+    }
+    Mat frame;
+    Mat moving;
+    Mat colored;
+    Mat currentEyes;
+    bool hsvExtension = false;
+    config.readFrame(frame);
+    flip(frame, frame, 1);
+    if(this->eyeDetector != nullptr)
+        this->eyeDetector->detectEyes(frame);
+    moving = this->subtractBackground(frame);
+    colored = this->detectColoredObject(moving, hsvExtension);
+    frame = this->detectActions(frame, colored, hsvExtension);
+    cvtColor(frame, frame, COLOR_BGR2RGB);
+    if(groupEnabled){
+        bitwise_or(frame, this->borders, frame);
+        currentEyes = this->currentEyesPosMat.at(this->currentEyesPosition(frame));
+        bitwise_or(frame, currentEyes, frame);
+    }
     bitwise_or(frame, this->currentGroup, frame);
-    circle(frame, this->eyes, 3, Scalar(0, 0, 255), -1);
+    circle(frame, this->eyes, 3, Scalar(255, 255, 255), -1);
     emit this->updatePictureSignal(frame);
 }
 

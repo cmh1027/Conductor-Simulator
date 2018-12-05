@@ -387,10 +387,10 @@ background: transparent;</string>
    <widget class="QWidget" name="horizontalLayoutWidget_6">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>280</x>
       <y>480</y>
       <width>128</width>
-      <height>51</height>
+      <height>41</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_7">

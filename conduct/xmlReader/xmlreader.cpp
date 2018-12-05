@@ -207,7 +207,7 @@ void XMLReader::parseGroup(const QDomElement& dom){
 }
 
 void XMLReader::addCommand(int time, const QString& command){
-    SyncTimer* timer = new SyncTimer(time, this->interval, TickInterval, command);
+    SyncTimer* timer = new SyncTimer(time, this->interval, command, TickInterval);
     connect(timer, &SyncTimer::timeout, this, [=](){
         emit this->commandSignal(timer->command);
         this->timeoutCount += 1;
@@ -219,7 +219,7 @@ void XMLReader::addCommand(int time, const QString& command){
 }
 
 void XMLReader::addDynamic(int time, const QString& dynamic){
-    SyncTimer* timer = new SyncTimer(time, this->interval, TickInterval, dynamic);
+    SyncTimer* timer = new SyncTimer(time, this->interval, dynamic);
     connect(timer, &SyncTimer::timeout, this, [=](){
         emit this->dynamicSignal(timer->command);
         this->timeoutCount += 1;
@@ -231,7 +231,7 @@ void XMLReader::addDynamic(int time, const QString& dynamic){
 }
 
 void XMLReader::addGroup(int time, const QString& group){
-    SyncTimer* timer = new SyncTimer(time, this->interval, TickInterval, group);
+    SyncTimer* timer = new SyncTimer(time, this->interval, group);
     connect(timer, &SyncTimer::timeout, this, [=](){
         int groupNum = timer->command.toInt();
         if(!(0 <= groupNum && groupNum <= GroupCount))
@@ -299,7 +299,7 @@ void XMLReader::randomizeSpeed(){
         return;
     bool mainDone = false;
     for(int index = 0; index < musicPlayer->count(); ++index)
-        musicPlayer->multSpeed(index, Random::pick(90, 110) / 100.0f, mainDone);
+        musicPlayer->multSpeed(index, Random::pick(85, 115) / 100.0f, mainDone);
 }
 
 void XMLReader::randomizeSpeed(int group1, int group2){
@@ -308,8 +308,8 @@ void XMLReader::randomizeSpeed(int group1, int group2){
     if(group1 == 0 || group2 == 0)
         this->randomizeSpeed();
     else{
-        musicPlayer->multSpeedGroup(group1-1, Random::pick(90, 110) / 100.0f);
-        musicPlayer->multSpeedGroup(group2-1, Random::pick(90, 110) / 100.0f);
+        musicPlayer->multSpeedGroup(group1-1, Random::pick(85, 115) / 100.0f);
+        musicPlayer->multSpeedGroup(group2-1, Random::pick(85, 115) / 100.0f);
     }
 }
 

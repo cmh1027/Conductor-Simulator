@@ -4,6 +4,7 @@
 #include "conduct/command/command.h"
 #include "conduct/module/synctimer.h"
 
+extern const int TickInterval;
 
 MusicSheet::MusicSheet(const QQueue<SyncTimer*>* commands) :
     QWidget(), commands(commands){}
@@ -16,13 +17,13 @@ void MusicSheet::paintEvent(QPaintEvent*){
     this->drawBackground(painter);
     for(auto it = commands->begin(); it != commands->end(); ++it){
         if(Beats.contains((*it)->command))
-            this->drawBeat(painter, (*it)->command, (*it)->getTime() / (*it)->getTickInterval());
+            this->drawBeat(painter, (*it)->command, (*it)->getTime() / TickInterval);
         else if(Dynamics.contains((*it)->command))
-            this->drawDynamic(painter, (*it)->command, (*it)->getTime() / (*it)->getTickInterval());
+            this->drawDynamic(painter, (*it)->command, (*it)->getTime() / TickInterval);
         else if(Commands.contains((*it)->command))
-            this->drawCommand(painter, (*it)->command, (*it)->getTime() / (*it)->getTickInterval());
+            this->drawCommand(painter, (*it)->command, (*it)->getTime() / TickInterval);
         else // group
-            this->drawGroup(painter, (*it)->command, (*it)->getTime() / (*it)->getTickInterval());
+            this->drawGroup(painter, (*it)->command, (*it)->getTime() / TickInterval);
     }
 
     painter.end();

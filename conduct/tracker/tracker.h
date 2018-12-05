@@ -38,6 +38,7 @@ public:
     void turnonEyeDetector();
     void setCurrentGroup(int);
     int eyePosition;
+    bool groupEnabled;
 
 private:
     Ptr<BackgroundSubtractorMOG2> pMOG2;
@@ -67,6 +68,9 @@ private:
     void drawBorders(Mat);
     void drawGroupSigns(Mat);
     int currentEyesPosition(Mat);
+    Mat subtractBackground(Mat);
+    Mat detectColoredObject(Mat, bool&);
+    Mat detectActions(Mat, Mat, bool);
 
 signals:
     void updatePictureSignal(Mat);

@@ -6,7 +6,7 @@ SyncTimer::SyncTimer(int tickInterval) : mutex(new std::mutex()), time(0), inter
 }
 
 
-SyncTimer::SyncTimer(int time, int tickInterval, const QString& command) : command(command), mutex(new std::mutex()),
+SyncTimer::SyncTimer(int time, const QString& command, int tickInterval) : command(command), mutex(new std::mutex()),
     time(time), interval(0), tickInterval(tickInterval)
 {
     Q_ASSERT(time >= 0);
@@ -14,7 +14,7 @@ SyncTimer::SyncTimer(int time, int tickInterval, const QString& command) : comma
     this->remaining = this->timeoutInterval;
 }
 
-SyncTimer::SyncTimer(int time, int interval, int tickInterval, const QString& command) : command(command), mutex(new std::mutex()),
+SyncTimer::SyncTimer(int time, int interval, const QString& command, int tickInterval) : command(command), mutex(new std::mutex()),
     time(time), interval(interval), tickInterval(tickInterval)
 {
     Q_ASSERT(time >= 0);

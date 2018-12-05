@@ -11,7 +11,7 @@
 const int LastInterval = 3000;
 const int MaxEnergy = 100;
 const QMap<Difficulty, int> DifInterval = {{Difficulty::Easy, 500}, {Difficulty::Normal, 400}, {Difficulty::Hard, 300}};
-const QMap<Difficulty, double> DifProb = {{Difficulty::Easy, 0.1}, {Difficulty::Normal, 0.3}, {Difficulty::Hard, 0.5}};
+const QMap<Difficulty, double> DifProb = {{Difficulty::Easy, 0.1}, {Difficulty::Normal, 1}, {Difficulty::Hard, 0.5}};
 const QMap<Difficulty, int> SpeedRollbackCount = {{Difficulty::Easy, 4}, {Difficulty::Normal, 7}, {Difficulty::Hard, 10}};
 const QMap<Dynamic, int> MinimumVerticalDistance = {{Dynamic::pp, 70}, {Dynamic::p, 110}, {Dynamic::mp, 150}, {Dynamic::mf, 190}, {Dynamic::f, 230}, {Dynamic::ff, 270}};
 const QMap<Dynamic, int> MaximumVerticalDistance = {{Dynamic::pp, 150}, {Dynamic::p, 190}, {Dynamic::mp, 230}, {Dynamic::mf, 270}, {Dynamic::f, 310}, {Dynamic::ff, 480}};
@@ -50,6 +50,7 @@ ConductSimulator::ConductSimulator() : tracker(nullptr), lastTimer(new SyncTimer
     });
     connect(xmlReader, &XMLReader::groupEnabledSignal, this, [=](bool isEnabled){
         this->groupEnabled = isEnabled;
+        tracker->groupEnabled = isEnabled;
     });
     connect(lastTimer, &SyncTimer::timeout, this, [=]{
         this->isPlaying = false;
@@ -189,13 +190,15 @@ void ConductSimulator::addCommand(QString command){
     if(!this->waitingCommands.contains(command)){
         this->waitingCommands.insert(command, new QQueue<SyncTimer*>());
     }
-    SyncTimer* timer = new SyncTimer(this->interval * 2, TickInterval);
+    SyncTimer* timer = new SyncTimer(this->interval * 2, command, TickInterval);
     connect(timer, &SyncTimer::timeout, this, [=]{
         if(this->waitingCommands.value(command)->contains(timer)){
             this->waitingCommands.value(command)->removeOne(timer);
             if(timer->tryLock()){
-                if(Beats.contains(command))
+                if(Beats.contains(command)){
                     this->beatFail();
+                    this->commandFail();
+                }
                 else
                     this->commandFail();
                 timer->deleteLater();
@@ -288,7 +291,6 @@ void ConductSimulator::commandSuccess(int remaining){
 void ConductSimulator::beatFail(){
     this->addScore(-100);
     this->addEnergy(-10);
-    emit this->commandSignal(Precision::Fail);
     emit this->dynamicSignal(Precision::Fail);
     if(Random::percent(DifProb[this->difficulty]))
         xmlReader->randomizeDynamic();
@@ -310,7 +312,6 @@ void ConductSimulator::commandFail(int originGroup, int currentGroup){
     if(Random::percent(DifProb[this->difficulty]))
         xmlReader->randomizeSpeed(originGroup, currentGroup);
 }
-
 
 
 bool ConductSimulator::checkDynamic(int distance, int min, int max){

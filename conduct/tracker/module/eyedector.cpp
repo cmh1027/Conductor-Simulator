@@ -61,8 +61,7 @@ void EyeDetector::connect(){
     wchar_t* file = new wchar_t[path.length()+1];
     path.toWCharArray(file);
     file[path.length()] = 0;
-    CreateProcess(nullptr, file, nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi);
-    // CreateProcess(nullptr, file, nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
+    CreateProcess(nullptr, file, nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
     delete[] file;
     ConnectNamedPipe(mat_pipe, nullptr);
     ConnectNamedPipe(size_pipe, nullptr);
