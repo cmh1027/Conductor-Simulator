@@ -1,5 +1,4 @@
 #include <QPushButton>
-#include <iostream>
 #include "menu_main.h"
 #include "ui_main.h"
 #include "widget/mainwindow.h"

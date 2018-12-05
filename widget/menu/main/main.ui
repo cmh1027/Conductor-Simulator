@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>305</width>
+    <width>371</width>
     <height>234</height>
    </rect>
   </property>
@@ -38,8 +38,8 @@
       </property>
       <property name="font">
        <font>
-        <family>Freestyle Script</family>
-        <pointsize>28</pointsize>
+        <family>CommercialScript BT</family>
+        <pointsize>30</pointsize>
         <italic>false</italic>
        </font>
       </property>
@@ -70,8 +70,8 @@
       </property>
       <property name="font">
        <font>
-        <family>MD아트체</family>
-        <pointsize>11</pointsize>
+        <family>CommercialScript BT</family>
+        <pointsize>14</pointsize>
        </font>
       </property>
       <property name="styleSheet">
@@ -99,8 +99,8 @@ QToolButton:hover{background-color: rgb(243, 175, 255);}</string>
       </property>
       <property name="font">
        <font>
-        <family>MD아트체</family>
-        <pointsize>11</pointsize>
+        <family>CommercialScript BT</family>
+        <pointsize>14</pointsize>
        </font>
       </property>
       <property name="styleSheet">
@@ -128,8 +128,8 @@ QToolButton:hover{background-color: rgb(243, 175, 255);}</string>
       </property>
       <property name="font">
        <font>
-        <family>MD아트체</family>
-        <pointsize>11</pointsize>
+        <family>CommercialScript BT</family>
+        <pointsize>14</pointsize>
        </font>
       </property>
       <property name="styleSheet">

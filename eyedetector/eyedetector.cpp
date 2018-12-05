@@ -9,9 +9,9 @@ using namespace cv;
 using namespace cv::face;
 
 int main(int argc, char *argv[]){
-    CascadeClassifier faceDetector("C:/Users/Coder/Desktop/qt/Conductor-Simulator/eyedetector/resources/haarcascade_frontalface_alt2.xml");
+    CascadeClassifier faceDetector("C:/Users/serom/Desktop/qt/Conductor-Simulator/eyedetector/resources/haarcascade_frontalface_alt2.xml");
     Ptr<Facemark> facemark = FacemarkLBF::create();
-    facemark->loadModel("C:/Users/Coder/Desktop/qt/Conductor-Simulator/eyedetector/resources/lbfmodel.yaml");
+    facemark->loadModel("C:/Users/serom/Desktop/qt/Conductor-Simulator/eyedetector/resources/lbfmodel.yaml");
     struct Pipes{
         int size;
         int rows;
@@ -31,7 +31,6 @@ int main(int argc, char *argv[]){
                 row_pipe = CONNECTPIPE(ROWNAME, GENERIC_READ);
                 col_pipe = CONNECTPIPE(COLNAME, GENERIC_READ);
                 type_pipe = CONNECTPIPE(TYPENAME, GENERIC_READ);
-                printf("%d %d %d %d %d %d\n", mat_pipe, size_pipe, eye_pipe, row_pipe, col_pipe, type_pipe);
                 if(mat_pipe != INVALID_HANDLE_VALUE && size_pipe != INVALID_HANDLE_VALUE && eye_pipe != INVALID_HANDLE_VALUE &&
                 row_pipe != INVALID_HANDLE_VALUE && col_pipe != INVALID_HANDLE_VALUE && type_pipe != INVALID_HANDLE_VALUE) 
                 break;

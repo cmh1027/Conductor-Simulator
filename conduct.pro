@@ -29,7 +29,6 @@ SOURCES += \
     conduct/config/config.cpp \
     conduct/module/utility.cpp \
     conduct/module/synctimer.cpp \
-    conduct/module/precisetimer.cpp \
     conduct/module/countdowntimer.cpp \
     conduct/xmlReader/xmlreader.cpp \
     conduct/xmlReader/musicplayer.cpp \
@@ -55,7 +54,6 @@ HEADERS += \
     conduct/conduct.h \
     conduct/command/command.h \
     conduct/config/config.h \
-    conduct/module/precisetimer.h \
     conduct/module/countdowntimer.h \
     conduct/module/synctimer.h \
     conduct/module/utility.h \

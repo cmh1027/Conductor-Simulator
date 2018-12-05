@@ -281,19 +281,19 @@ void Tracker::drawGroupSigns(Mat frame){
     this->currentGroupMat.push_back(mat);
     // (1)
     mat = mat_empty.clone();
-    circle(mat, Point(SIGN_RADIUS + SIGN_RADIUS, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    circle(mat, Point(SIGN_RADIUS, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
     this->currentGroupMat.push_back(mat);
     // (2)
     mat = mat_empty.clone();
-    circle(mat, Point(SIGN_RADIUS + widthUnit * NUMERATOR_HIGH + SIGN_RADIUS, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    circle(mat, Point(SIGN_RADIUS + widthUnit * NUMERATOR_HIGH, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
     this->currentGroupMat.push_back(mat);
     // (3)
     mat = mat_empty.clone();
-    circle(mat, Point(SIGN_RADIUS + SIGN_RADIUS, SIGN_RADIUS + heightUnit), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    circle(mat, Point(SIGN_RADIUS, SIGN_RADIUS + heightUnit), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
     this->currentGroupMat.push_back(mat);
     // (4)
     mat = mat_empty.clone();
-    circle(mat, Point(SIGN_RADIUS + widthUnit * NUMERATOR_HIGH + SIGN_RADIUS, SIGN_RADIUS + heightUnit), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    circle(mat, Point(SIGN_RADIUS + widthUnit * NUMERATOR_HIGH, SIGN_RADIUS + heightUnit), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
     this->currentGroupMat.push_back(mat);
 }
 

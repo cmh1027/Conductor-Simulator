@@ -1,5 +1,4 @@
 #include "eyedetector.h"
-#include <iostream>
 EyeDetector::EyeDetector(){}
 
 EyeDetector::~EyeDetector(){
@@ -62,7 +61,8 @@ void EyeDetector::connect(){
     wchar_t* file = new wchar_t[path.length()+1];
     path.toWCharArray(file);
     file[path.length()] = 0;
-    CreateProcess(nullptr, file, nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
+    CreateProcess(nullptr, file, nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi);
+    // CreateProcess(nullptr, file, nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
     delete[] file;
     ConnectNamedPipe(mat_pipe, nullptr);
     ConnectNamedPipe(size_pipe, nullptr);
@@ -88,10 +88,6 @@ void EyeDetector::reconnect(){
 void EyeDetector::stop(){
     CloseHandle(mat_pipe);
     CloseHandle(eye_pipe);
-    CloseHandle(size_pipe);
-    CloseHandle(row_pipe);
-    CloseHandle(col_pipe);
-    CloseHandle(type_pipe);
     CloseHandle(pi.hThread);
     CloseHandle(pi.hProcess);
 }

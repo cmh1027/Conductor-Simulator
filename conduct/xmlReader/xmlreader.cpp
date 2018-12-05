@@ -1,9 +1,7 @@
 #include <QSet>
 #include <QtXml>
 #include <QFileInfo>
-#include <iostream>
 #include "conduct/module/synctimer.h"
-#include "conduct/module/precisetimer.h"
 #include "conduct/command/command.h"
 #include "conduct/module/random.h"
 #include "xmlreader.h"
@@ -136,7 +134,7 @@ bool XMLReader::parseCommand(const QDomElement& dom){
         QString&& action = child.attribute("action");
         if(Dynamics.contains(action))
             this->addDynamic(static_cast<int>(time * 1000), action);
-        else if(Commands.contains(action))
+        else if(Beats.contains(action) || Commands.contains(action))
             this->addCommand(static_cast<int>(time * 1000), action);
         else // group
             this->addGroup(static_cast<int>(time * 1000), action);
@@ -211,7 +209,6 @@ void XMLReader::parseGroup(const QDomElement& dom){
 void XMLReader::addCommand(int time, const QString& command){
     SyncTimer* timer = new SyncTimer(time, this->interval, TickInterval, command);
     connect(timer, &SyncTimer::timeout, this, [=](){
-        std::cout << command.toStdString() << std::endl;
         emit this->commandSignal(timer->command);
         this->timeoutCount += 1;
         if(this->timeoutCount == this->timers.count()){

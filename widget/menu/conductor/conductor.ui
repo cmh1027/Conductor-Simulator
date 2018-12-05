@@ -18,19 +18,6 @@
     <normaloff>:/resources/icon.ico</normaloff>:/resources/icon.ico</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QLabel" name="colorLabel">
-    <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>490</y>
-      <width>331</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QPushButton" name="startButton">
     <property name="geometry">
      <rect>
@@ -47,44 +34,6 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
     <property name="text">
      <string>Start</string>
     </property>
-   </widget>
-   <widget class="QWidget" name="horizontalLayoutWidget_6">
-    <property name="geometry">
-     <rect>
-      <x>260</x>
-      <y>490</y>
-      <width>91</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_7">
-     <item>
-      <widget class="QLabel" name="label_6">
-       <property name="font">
-        <font>
-         <family>Agency FB</family>
-         <pointsize>16</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>Score :</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="scoreLabel">
-       <property name="font">
-        <font>
-         <family>Agency FB</family>
-         <pointsize>14</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </widget>
    <widget class="QListWidget" name="listWidget">
     <property name="geometry">
@@ -234,10 +183,10 @@ border: 4px dotted blue;</string>
      </property>
      <property name="font">
       <font>
-       <family>BrushScript BT</family>
+       <family>CommercialScript BT</family>
        <pointsize>16</pointsize>
        <weight>50</weight>
-       <italic>true</italic>
+       <italic>false</italic>
        <bold>false</bold>
       </font>
      </property>
@@ -302,10 +251,10 @@ border: 4px dotted blue;</string>
      </property>
      <property name="font">
       <font>
-       <family>BrushScript BT</family>
+       <family>CommercialScript BT</family>
        <pointsize>16</pointsize>
        <weight>50</weight>
-       <italic>true</italic>
+       <italic>false</italic>
        <bold>false</bold>
       </font>
      </property>
@@ -430,6 +379,44 @@ background: transparent;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_6">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>480</y>
+      <width>128</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item>
+      <widget class="QLabel" name="label_6">
+       <property name="font">
+        <font>
+         <family>Cambria Math</family>
+         <pointsize>16</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Score :</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="scoreLabel">
+       <property name="font">
+        <font>
+         <family>Cambria Math</family>
+         <pointsize>18</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>

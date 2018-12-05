@@ -193,8 +193,8 @@ namespace Menu{
             simulator->resume();
         }
         else{
-            this->rewindSheet();
-            simulator->gameStart();
+            if(simulator->gameStart())
+                this->rewindSheet();
         }
     }
 

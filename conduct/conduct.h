@@ -33,6 +33,11 @@ public:
     void applyTracker(Tracker*);
     void loadXML(const QString&);
     bool isPausing() const;
+    void start();
+    bool gameStart();
+    void pause();
+    void resume();
+    void clear();
 
 
 private:
@@ -81,11 +86,6 @@ signals:
 
 
 public slots:
-    void start();
-    void gameStart();
-    void pause();
-    void resume();
-    void clear();
     void addCommand(QString);
     void setDynamic(const QString&);
     void setGroup(int);

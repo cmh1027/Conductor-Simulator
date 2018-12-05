@@ -32,9 +32,11 @@
       </property>
       <property name="font">
        <font>
-        <family>Freestyle Script</family>
-        <pointsize>28</pointsize>
-        <italic>false</italic>
+        <family>Comic Sans MS</family>
+        <pointsize>22</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
        </font>
       </property>
       <property name="styleSheet">
@@ -66,8 +68,11 @@
         </property>
         <property name="font">
          <font>
-          <family>MD아트체</family>
+          <family>Comic Sans MS</family>
           <pointsize>11</pointsize>
+          <weight>75</weight>
+          <italic>true</italic>
+          <bold>true</bold>
          </font>
         </property>
         <property name="styleSheet">
@@ -83,8 +88,10 @@ QToolButton:hover{background-color: rgb(243, 175, 255);}</string>
        <widget class="QLabel" name="label_2">
         <property name="font">
          <font>
-          <family>HY동녘M</family>
-          <italic>false</italic>
+          <family>Comic Sans MS</family>
+          <weight>75</weight>
+          <italic>true</italic>
+          <bold>true</bold>
          </font>
         </property>
         <property name="text">
@@ -114,8 +121,11 @@ They can do well themselves</string>
         </property>
         <property name="font">
          <font>
-          <family>MD아트체</family>
+          <family>Comic Sans MS</family>
           <pointsize>11</pointsize>
+          <weight>75</weight>
+          <italic>true</italic>
+          <bold>true</bold>
          </font>
         </property>
         <property name="styleSheet">
@@ -131,8 +141,10 @@ QToolButton:hover{background-color: rgb(243, 175, 255);}</string>
        <widget class="QLabel" name="label_3">
         <property name="font">
          <font>
-          <family>HY동녘M</family>
-          <italic>false</italic>
+          <family>Comic Sans MS</family>
+          <weight>75</weight>
+          <italic>true</italic>
+          <bold>true</bold>
          </font>
         </property>
         <property name="text">
@@ -162,8 +174,11 @@ They need your direction</string>
         </property>
         <property name="font">
          <font>
-          <family>MD아트체</family>
+          <family>Comic Sans MS</family>
           <pointsize>11</pointsize>
+          <weight>75</weight>
+          <italic>true</italic>
+          <bold>true</bold>
          </font>
         </property>
         <property name="styleSheet">
@@ -179,8 +194,10 @@ QToolButton:hover{background-color: rgb(243, 175, 255);}</string>
        <widget class="QLabel" name="label_4">
         <property name="font">
          <font>
-          <family>HY동녘M</family>
-          <italic>false</italic>
+          <family>Comic Sans MS</family>
+          <weight>75</weight>
+          <italic>true</italic>
+          <bold>true</bold>
          </font>
         </property>
         <property name="text">
@@ -208,8 +225,11 @@ They can't do anything without you</string>
       </property>
       <property name="font">
        <font>
-        <family>MD아트체</family>
+        <family>Comic Sans MS</family>
         <pointsize>11</pointsize>
+        <weight>75</weight>
+        <italic>true</italic>
+        <bold>true</bold>
        </font>
       </property>
       <property name="styleSheet">

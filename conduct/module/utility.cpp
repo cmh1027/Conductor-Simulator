@@ -224,32 +224,3 @@ QPair<int, int> findCentroid(const QSet<QPair<int, int>>& dataPixels){
     Q_ASSERT(dataPixels.size() != 0);
     return qMakePair(static_cast<int>(x/dataPixels.size()), static_cast<int>(y/dataPixels.size()));
 }
-
-/*
-void drawPolyline(Mat &im, const std::vector<Point2f> &landmarks, const int start, const int end,
-                  bool isClosed, const Scalar& color){
-    std::vector <Point> points;
-    for (int i = start; i <= end; i++){
-        points.push_back(cv::Point(landmarks[i].x, landmarks[i].y));
-    }
-    polylines(im, points, isClosed, color, 2, 16);
-}
-
-void drawLandmarks(Mat &im, std::vector<Point2f> &landmarks, const Scalar& color){
-    if (landmarks.size() == 68){
-      drawPolyline(im, landmarks, 0, 16);           // Jaw line
-      drawPolyline(im, landmarks, 17, 21);          // Left eyebrow
-      drawPolyline(im, landmarks, 22, 26);          // Right eyebrow
-      drawPolyline(im, landmarks, 27, 30);          // Nose bridge
-      drawPolyline(im, landmarks, 30, 35, true);    // Lower nose
-      drawPolyline(im, landmarks, 36, 41, true);    // Left eye
-      drawPolyline(im, landmarks, 42, 47, true);    // Right Eye
-      drawPolyline(im, landmarks, 48, 59, true);    // Outer lip
-      drawPolyline(im, landmarks, 60, 67, true);    // Inner lip
-    }
-    else{
-      for(uint i = 0; i < landmarks.size(); i++)
-        circle(im,landmarks[i],3, color, FILLED);
-    }
-}
-*/

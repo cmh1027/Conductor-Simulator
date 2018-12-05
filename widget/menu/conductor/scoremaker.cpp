@@ -1,6 +1,5 @@
 #include <QPainter>
 #include <algorithm>
-#include <iostream>
 #include "scoremaker.h"
 #include "conduct/command/command.h"
 #include "conduct/module/synctimer.h"
@@ -23,7 +22,7 @@ void MusicSheet::paintEvent(QPaintEvent*){
         else if(Commands.contains((*it)->command))
             this->drawCommand(painter, (*it)->command, (*it)->getTime() / (*it)->getTickInterval());
         else // group
-            this->drawCommand(painter, (*it)->command, (*it)->getTime() / (*it)->getTickInterval());
+            this->drawGroup(painter, (*it)->command, (*it)->getTime() / (*it)->getTickInterval());
     }
 
     painter.end();
@@ -49,7 +48,7 @@ void MusicSheet::drawBeat(QPainter& painter, const QString command, int x){
 }
 
 void MusicSheet::drawGroup(QPainter& painter, const QString command, int x){
-     painter.drawText(x * 3, height()*3/4, command);
+     painter.drawText(x * 3, height(), command);
 }
 
 

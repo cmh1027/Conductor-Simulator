@@ -1,7 +1,6 @@
 #include <QString>
 #include <QTimer>
 #include <cmath>
-#include <iostream>
 #include "conduct.h"
 #include "xmlReader/xmlreader.h"
 #include "module/synctimer.h"
@@ -11,7 +10,7 @@
 
 const int LastInterval = 3000;
 const int MaxEnergy = 100;
-const QMap<Difficulty, int> DifInterval = {{Difficulty::Easy, 600}, {Difficulty::Normal, 400}, {Difficulty::Hard, 200}};
+const QMap<Difficulty, int> DifInterval = {{Difficulty::Easy, 500}, {Difficulty::Normal, 400}, {Difficulty::Hard, 300}};
 const QMap<Difficulty, double> DifProb = {{Difficulty::Easy, 0.1}, {Difficulty::Normal, 0.3}, {Difficulty::Hard, 0.5}};
 const QMap<Dynamic, int> minVerticalDistance = {{Dynamic::pp, 70}, {Dynamic::p, 110}, {Dynamic::mp, 150}, {Dynamic::mf, 190}, {Dynamic::f, 230}, {Dynamic::ff, 270}};
 const QMap<Dynamic, int> maxVerticalDistance = {{Dynamic::pp, 150}, {Dynamic::p, 190}, {Dynamic::mp, 230}, {Dynamic::mf, 270}, {Dynamic::f, 310}, {Dynamic::ff, 480}};
@@ -105,14 +104,14 @@ void ConductSimulator::start(){
     tracker->start();
 }
 
-void ConductSimulator::gameStart(){
+bool ConductSimulator::gameStart(){
     if(this->isPlaying){
         emit this->infoSignal("The game is playing");
-        return;
+        return false;
     }
     if(!xmlReader->isXMLLoaded()){
         emit this->infoSignal("XML file is not loaded");
-        return;
+        return false;
     }
     this->dynamic = None;
     this->currentGroup = 0;
@@ -125,6 +124,7 @@ void ConductSimulator::gameStart(){
     this->clearCommands();
     this->isPlaying = true;
     this->startTimer->start(3);
+    return true;
 }
 
 void ConductSimulator::pause(){
@@ -183,7 +183,6 @@ void ConductSimulator::clearCommands(){
 }
 
 void ConductSimulator::addCommand(QString command){
-    std::cout << "check " << command.toStdString() << std::endl;
     mutex.lock();
     if(!this->waitingCommands.contains(command)){
         this->waitingCommands.insert(command, new QQueue<SyncTimer*>());
