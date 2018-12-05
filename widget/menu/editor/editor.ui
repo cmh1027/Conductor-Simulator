@@ -269,7 +269,7 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
        <enum>Qt::MoveAction</enum>
       </property>
       <property name="selectionMode">
-       <enum>QAbstractItemView::ExtendedSelection</enum>
+       <enum>QAbstractItemView::SingleSelection</enum>
       </property>
       <column>
        <property name="text">

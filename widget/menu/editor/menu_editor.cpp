@@ -18,8 +18,7 @@
 namespace Menu{
     Editor::Editor(MainWindow *parent) : Menu::Menu(parent), ui(new Ui::Editor){}
 
-    Editor::~Editor()
-    {
+    Editor::~Editor(){
         this->clearList();
         delete ui;
     }
@@ -32,7 +31,7 @@ namespace Menu{
         this->actionComboBox = parent->findChild<QComboBox*>("actionComboBox");
         this->groupComboBox = parent->findChild<QComboBox*>("groupComboBox");
         this->musicTableWidget = parent->findChild<QTableWidget*>("musicTableWidget");
-        this->musicTableWidget->setColumnWidth(MusicColumn::Main, 35);
+        this->musicTableWidget->setColumnWidth(MusicColumn::Main, 45);
         this->musicTableWidget->setColumnWidth(MusicColumn::Group, 70);
         this->musicTableWidget->horizontalHeader()->setStretchLastSection(true);
         this->typeChanged(0);
@@ -233,19 +232,22 @@ namespace Menu{
     }
 
     void Editor::toggleMainMusic(){
-        auto list = this->musicTableWidget->selectedItems();
-        QSet<int> selectedRows;
-        foreach(auto item, list){
-            int row = item->row();
-            if(!selectedRows.contains(row))
-                selectedRows.insert(row);
-        }
-        foreach(int row, selectedRows){
-            auto item = this->musicTableWidget->item(row, MusicColumn::Main);
-            if(item->text().isEmpty())
-                item->setText("O");
-            else{
-                item->setText("");
+        int row = this->musicTableWidget->currentRow();
+        if(row != -1){
+            QString&& group = this->musicTableWidget->item(row, MusicColumn::Group)->text();
+            if(group.isEmpty()){
+                QMessageBox::critical(parent, "Error", "Specify a group first");
+                return;
+            }
+            bool isNotMain = this->musicTableWidget->item(row, MusicColumn::Main)->text().isEmpty();
+            for(int i = 0; i < this->musicTableWidget->rowCount(); ++i){
+                this->musicTableWidget->item(i, MusicColumn::Main)->setText("");
+            }
+            if(isNotMain){
+                for(int i = 0; i < this->musicTableWidget->rowCount(); ++i){
+                    if(group == this->musicTableWidget->item(i, MusicColumn::Group)->text())
+                        this->musicTableWidget->item(i, MusicColumn::Main)->setText("O");
+                }
             }
         }
     }
@@ -253,9 +255,17 @@ namespace Menu{
     void Editor::setMusicGroup(int){
         int row = this->musicTableWidget->currentRow();
         if(row != -1){
-            QString&& text = this->groupComboBox->currentText();
-            auto actionPtr = this->musicTableWidget->item(row, MusicColumn::Group);
-            actionPtr->setText(text);
+            QString&& group = this->groupComboBox->currentText();
+            this->musicTableWidget->item(row, MusicColumn::Main)->setText("");
+            for(int i = 0; i < this->musicTableWidget->rowCount(); ++i){
+                bool isMain = this->musicTableWidget->item(i, MusicColumn::Main)->text() == "O";
+                QString&& itemGroup = this->musicTableWidget->item(i, MusicColumn::Group)->text();
+                if(isMain && group == itemGroup){
+                    this->musicTableWidget->item(row, MusicColumn::Main)->setText("O");
+                    break;
+                }
+            }
+            this->musicTableWidget->item(row, MusicColumn::Group)->setText(group);
         }
     }
 

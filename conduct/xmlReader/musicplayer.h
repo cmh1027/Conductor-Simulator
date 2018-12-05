@@ -63,11 +63,11 @@ public:
     void setVolumeAll(int);
     bool empty() const;
     void setSpeed(int, float);
-    void setSpeedSpecific(int, float);
     void setSpeedAll(float);
     void multSpeed(int, float);
-    void multSpeedSpecific(int, float);
+    void multSpeed(int, float, bool&);
     void multSpeedAll(float);
+    void multSpeedGroup(int, float);
 
 signals:
     void tickSignal();
@@ -85,6 +85,8 @@ private:
     FMOD_DSP* dsp;
     uint tickInterval;
     MusicTimer* timer;
+    void multSpeedSpecific(int, float);
+    void setSpeedSpecific(int, float);
 };
 
 

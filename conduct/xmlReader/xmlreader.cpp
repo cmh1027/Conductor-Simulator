@@ -294,6 +294,31 @@ void XMLReader::randomizeDynamic(){
         musicPlayer->setVolume(index, Random::pick(15, 90));
 }
 
+void XMLReader::randomizeSpeed(){
+    if(!this->tempoChangeable)
+        return;
+    bool mainDone = false;
+    for(int index = 0; index < musicPlayer->count(); ++index)
+        musicPlayer->multSpeed(index, Random::pick(90, 110) / 100.0f, mainDone);
+}
+
+void XMLReader::randomizeSpeed(int group1, int group2){
+    if(!this->tempoChangeable)
+        return;
+    if(group1 == 0 || group2 == 0)
+        this->randomizeSpeed();
+    else{
+        musicPlayer->multSpeedGroup(group1-1, Random::pick(90, 110) / 100.0f);
+        musicPlayer->multSpeedGroup(group2-1, Random::pick(90, 110) / 100.0f);
+    }
+}
+
+void XMLReader::normalizeSpeed(){
+    if(!this->tempoChangeable)
+        return;
+    musicPlayer->setSpeedAll(1.0f);
+}
+
 const QQueue<SyncTimer*>* XMLReader::getTimers(){
     return &this->timers;
 }

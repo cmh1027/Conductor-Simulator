@@ -94,25 +94,13 @@ bool MusicPlayer::empty() const{
 
 void MusicPlayer::setVolume(int index, int volume){
     Q_ASSERT(index < musicCount);
-    if(mainSound.contains(index)){
-        foreach(int number, mainSound){
-            FMOD_Channel_SetVolume(channel[number], VOLUME(volume));
-        }
-    }
-    else
-        FMOD_Channel_SetVolume(channel[index], VOLUME(volume));
+    FMOD_Channel_SetVolume(channel[index], VOLUME(volume));
 }
 
 void MusicPlayer::setVolumeGroup(int group, int volume){
     Q_ASSERT(group < groups.size());
     foreach(auto index, groups[group]){
-        if(mainSound.contains(index)){
-            foreach(int number, mainSound){
-                FMOD_Channel_SetVolume(channel[number], VOLUME(volume));
-            }
-        }
-        else
-            FMOD_Channel_SetVolume(channel[index], VOLUME(volume));
+        FMOD_Channel_SetVolume(channel[index], VOLUME(volume));
     }
 }
 
@@ -158,6 +146,21 @@ void MusicPlayer::multSpeed(int index, float speed){
     }
 }
 
+void MusicPlayer::multSpeed(int index, float speed, bool& mainDone){
+    Q_ASSERT(index < musicCount);
+    if(mainSound.contains(index)){
+        if(mainDone)
+            return;
+        foreach(int number, mainSound){
+            multSpeedSpecific(number, speed);
+        }
+        mainDone = true;
+    }
+    else{
+        multSpeedSpecific(index, speed);
+    }
+}
+
 void MusicPlayer::multSpeedSpecific(int index, float speed){
     speeds[index] = speeds[index] * speed;
     FMOD_DSP_SetParameterFloat(dsp, 0, 1/speeds[index]);
@@ -166,12 +169,15 @@ void MusicPlayer::multSpeedSpecific(int index, float speed){
 }
 
 void MusicPlayer::multSpeedAll(float speed){
-    FMOD_FOREACH(i, speeds[i] = speeds[i] * speed);
-    FMOD_FOREACH(i, FMOD_DSP_SetParameterFloat(dsp, 0, 1/speeds[i]);
-                    FMOD_Channel_SetPitch(channel[i], speeds[i]);
-                    FMOD_Channel_AddDSP(channel[i], 0, dsp));
+    FMOD_FOREACH(i, multSpeedSpecific(i, speed));
 }
 
+void MusicPlayer::multSpeedGroup(int group, float speed){
+    Q_ASSERT(group < groups.size());
+    foreach(auto index, groups[group]){
+         multSpeedSpecific(index, speed);
+    }
+}
 
 MusicTimer::MusicTimer(uint tickInterval) : tickInterval(tickInterval), isRunning(false), isEnded(true),
     channel(nullptr)

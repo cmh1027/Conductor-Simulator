@@ -12,10 +12,11 @@ const int LastInterval = 3000;
 const int MaxEnergy = 100;
 const QMap<Difficulty, int> DifInterval = {{Difficulty::Easy, 500}, {Difficulty::Normal, 400}, {Difficulty::Hard, 300}};
 const QMap<Difficulty, double> DifProb = {{Difficulty::Easy, 0.1}, {Difficulty::Normal, 0.3}, {Difficulty::Hard, 0.5}};
-const QMap<Dynamic, int> minVerticalDistance = {{Dynamic::pp, 70}, {Dynamic::p, 110}, {Dynamic::mp, 150}, {Dynamic::mf, 190}, {Dynamic::f, 230}, {Dynamic::ff, 270}};
-const QMap<Dynamic, int> maxVerticalDistance = {{Dynamic::pp, 150}, {Dynamic::p, 190}, {Dynamic::mp, 230}, {Dynamic::mf, 270}, {Dynamic::f, 310}, {Dynamic::ff, 480}};
-const QMap<Dynamic, int> minHorizontalDistance = {{Dynamic::pp, 70}, {Dynamic::p, 135}, {Dynamic::mp, 200}, {Dynamic::mf, 265}, {Dynamic::f, 330}, {Dynamic::ff, 400}};
-const QMap<Dynamic, int> maxHorizontalDistance = {{Dynamic::pp, 170}, {Dynamic::p, 235}, {Dynamic::mp, 300}, {Dynamic::mf, 365}, {Dynamic::f, 430}, {Dynamic::ff, 640}};
+const QMap<Difficulty, int> SpeedRollbackCount = {{Difficulty::Easy, 4}, {Difficulty::Normal, 7}, {Difficulty::Hard, 10}};
+const QMap<Dynamic, int> MinimumVerticalDistance = {{Dynamic::pp, 70}, {Dynamic::p, 110}, {Dynamic::mp, 150}, {Dynamic::mf, 190}, {Dynamic::f, 230}, {Dynamic::ff, 270}};
+const QMap<Dynamic, int> MaximumVerticalDistance = {{Dynamic::pp, 150}, {Dynamic::p, 190}, {Dynamic::mp, 230}, {Dynamic::mf, 270}, {Dynamic::f, 310}, {Dynamic::ff, 480}};
+const QMap<Dynamic, int> MinimumHorizontalDistance = {{Dynamic::pp, 70}, {Dynamic::p, 135}, {Dynamic::mp, 200}, {Dynamic::mf, 265}, {Dynamic::f, 330}, {Dynamic::ff, 400}};
+const QMap<Dynamic, int> MaximumHorizontalDistance = {{Dynamic::pp, 170}, {Dynamic::p, 235}, {Dynamic::mp, 300}, {Dynamic::mf, 365}, {Dynamic::f, 430}, {Dynamic::ff, 640}};
 
 
 ConductSimulator::ConductSimulator() : tracker(nullptr), lastTimer(new SyncTimer(TickInterval)),
@@ -123,6 +124,7 @@ bool ConductSimulator::gameStart(){
     this->setEnergy(MaxEnergy);
     this->clearCommands();
     this->isPlaying = true;
+    this->successCount = 0;
     this->startTimer->start(3);
     return true;
 }
@@ -274,6 +276,12 @@ void ConductSimulator::commandSuccess(int remaining){
     else{
         emit this->commandSignal(Precision::Bad);
     }
+    if(precision < 0.7){
+        this->successCount += 1;
+        if(this->successCount == SpeedRollbackCount[this->difficulty]){
+            this->successCount = 0;
+        }
+    }
     this->addEnergy(1);
 }
 
@@ -290,6 +298,8 @@ void ConductSimulator::commandFail(){
     this->addScore(-50);
     this->addEnergy(-7);
     emit this->commandSignal(Precision::Fail);
+    if(Random::percent(DifProb[this->difficulty]))
+        xmlReader->randomizeSpeed();
 }
 
 
@@ -297,6 +307,8 @@ void ConductSimulator::commandFail(int originGroup, int currentGroup){
     this->addScore(-50);
     this->addEnergy(-7);
     emit this->commandSignal(Precision::Fail);
+    if(Random::percent(DifProb[this->difficulty]))
+        xmlReader->randomizeSpeed(originGroup, currentGroup);
 }
 
 
@@ -340,7 +352,7 @@ void ConductSimulator::checkVerticalDynamic(int distance){
         group1 = this->currentGroup;
         group2 = tracker->eyePosition;
     }
-    if(this->checkDynamic(distance, minVerticalDistance[this->dynamic], maxVerticalDistance[this->dynamic]))
+    if(this->checkDynamic(distance, MinimumVerticalDistance[this->dynamic], MaximumVerticalDistance[this->dynamic]))
         xmlReader->setDynamic(this->dynamic, group1, group2);
     else{
         if(Random::percent(DifProb[this->difficulty]))
@@ -357,7 +369,7 @@ void ConductSimulator::checkHorizontalDynamic(int distance){
         group1 = this->currentGroup;
         group2 = tracker->eyePosition;
     }
-    if(this->checkDynamic(distance, minHorizontalDistance[this->dynamic], maxHorizontalDistance[this->dynamic]))
+    if(this->checkDynamic(distance, MinimumHorizontalDistance[this->dynamic], MaximumHorizontalDistance[this->dynamic]))
         xmlReader->setDynamic(this->dynamic, group1, group2);
     else{
         if(Random::percent(DifProb[this->difficulty]))
@@ -367,7 +379,7 @@ void ConductSimulator::checkHorizontalDynamic(int distance){
 
 Dynamic ConductSimulator::dynamicByVertical(int distance){
     foreach(Dynamic dynamic, DynamicMap){
-        if(minVerticalDistance[dynamic] <= distance && distance <= maxVerticalDistance[dynamic])
+        if(MinimumVerticalDistance[dynamic] <= distance && distance <= MaximumVerticalDistance[dynamic])
             return dynamic;
     }
     return Dynamic::None;
@@ -375,7 +387,7 @@ Dynamic ConductSimulator::dynamicByVertical(int distance){
 
 Dynamic ConductSimulator::dynamicByHorizontal(int distance){
     foreach(Dynamic dynamic, DynamicMap){
-        if(minHorizontalDistance[dynamic] <= distance && distance <= maxHorizontalDistance[dynamic])
+        if(MinimumHorizontalDistance[dynamic] <= distance && distance <= MaximumHorizontalDistance[dynamic])
             return dynamic;
     }
     return Dynamic::None;
