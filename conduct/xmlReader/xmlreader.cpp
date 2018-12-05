@@ -254,8 +254,8 @@ void XMLReader::setVolume(int volume, int group1, int group2){
     if(group1 == 0 || group2 == 0)
         this->musicPlayer->setVolumeAll(volume);
     else{
-        this->musicPlayer->setVolumeGroup(volume, group1-1);
-        this->musicPlayer->setVolumeGroup(volume, group2-1);
+        this->musicPlayer->setVolumeGroup(group1-1, volume);
+        this->musicPlayer->setVolumeGroup(group2-1, volume);
     }
 }
 
