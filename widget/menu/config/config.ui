@@ -418,25 +418,12 @@ QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
 background-color: rgb(255, 255, 255);</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_7">
+   <widget class="QPushButton" name="groupEnableButton">
     <property name="geometry">
      <rect>
-      <x>510</x>
+      <x>600</x>
       <y>580</y>
-      <width>71</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Eye detector</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pathButton">
-    <property name="geometry">
-     <rect>
-      <x>590</x>
-      <y>577</y>
-      <width>41</width>
+      <width>31</width>
       <height>23</height>
      </rect>
     </property>
@@ -445,20 +432,20 @@ background-color: rgb(255, 255, 255);</string>
 QPushButton:hover{background-color: rgb(191, 191, 191);}</string>
     </property>
     <property name="text">
-     <string>Path</string>
+     <string>Off</string>
     </property>
    </widget>
-   <widget class="QLabel" name="pathLabel">
+   <widget class="QLabel" name="label_7">
     <property name="geometry">
      <rect>
-      <x>650</x>
-      <y>580</y>
-      <width>201</width>
+      <x>510</x>
+      <y>583</y>
+      <width>94</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string/>
+     <string>Show borders</string>
     </property>
    </widget>
   </widget>

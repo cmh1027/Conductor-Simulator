@@ -16,6 +16,7 @@ class QSlider;
 class QLabel;
 class QLineEdit;
 class ClickableLabel;
+class QPushButton;
 
 namespace Menu{
     class Configuration : public Menu::Menu{
@@ -37,9 +38,9 @@ namespace Menu{
         QLabel* ratioLabel;
         QLabel* thresholdLabel;
         QLabel* queueSizeLabel;
-        QLabel* filePath;
         QLineEdit* cameraLineEdit;
         ClickableLabel* frameLabel;
+        QPushButton *groupEnableButton;
 
     public slots:
         void addItem(const QString&);
@@ -54,7 +55,7 @@ namespace Menu{
         void setHistory(int);
         void setKernel(int);
         void setQueueSize(int);
-        void setEyeDetectorPath();
+        void toggleGroupEnable();
 
     };
 }

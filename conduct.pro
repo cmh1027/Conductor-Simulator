@@ -76,7 +76,6 @@ HEADERS += \
     widget/menu/conductor/menu_difficulty.h \
     conduct/module/random.h \
     conduct/tracker/module/eyedetector.h \
-    eyedetector/include/const.h
 
 FORMS += \
     widget/menu/conductor/conductor.ui \
@@ -97,20 +96,21 @@ SUBDIRS += \
     conduct.pro
 
 INCLUDEPATH += C:/MinGW/include
-INCLUDEPATH += D:/opencv_3.2.0_32bit/build/include
+INCLUDEPATH += D:/opencv_build_4.0.0_64bit/install/include
 INCLUDEPATH += D:/FMOD/api/lowlevel/inc
 
 
-LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_core320
-LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_highgui320
-LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_imgcodecs320
-LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_imgproc320
-LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_features2d320
-LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_calib3d320
-LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_videoio320
-LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_video320
-LIBS += -LD:/opencv_build_3.2.0_32bit/bin/ -llibopencv_objdetect320
-LIBS += -LD:/FMOD/api/lowlevel/lib -lfmod
+LIBS += -LD:/opencv_build_4.0.0_64bit/bin/ -llibopencv_core400
+LIBS += -LD:/opencv_build_4.0.0_64bit/bin/ -llibopencv_highgui400
+LIBS += -LD:/opencv_build_4.0.0_64bit/bin/ -llibopencv_imgcodecs400
+LIBS += -LD:/opencv_build_4.0.0_64bit/bin/ -llibopencv_imgproc400
+LIBS += -LD:/opencv_build_4.0.0_64bit/bin/ -llibopencv_features2d400
+LIBS += -LD:/opencv_build_4.0.0_64bit/bin/ -llibopencv_calib3d400
+LIBS += -LD:/opencv_build_4.0.0_64bit/bin/ -llibopencv_videoio400
+LIBS += -LD:/opencv_build_4.0.0_64bit/bin/ -llibopencv_video400
+LIBS += -LD:/opencv_build_4.0.0_64bit/bin/ -llibopencv_objdetect400
+LIBS += -LD:/opencv_build_4.0.0_64bit/bin/ -llibopencv_face400
+LIBS += -LD:/FMOD/api/lowlevel/lib -lfmod64
 
 RESOURCES += \
     resources.qrc

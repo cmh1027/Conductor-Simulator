@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include <cmath>
 #include <vector>
+#include <opencv2/imgproc.hpp>
 #include "tracker.h"
 #include "thread/detector.h"
 #include "thread/thread.h"
@@ -19,8 +20,8 @@ const int DENOMINATOR = 24;
 const int SIGN_RADIUS = 5;
 
 
-Tracker::Tracker() : groupEnabled(false), frameTimer(new QTimer()), inputTimer(new QTimer()),
-    colorSelected(false), emptyFlag(0), haveLastPoint(false), eyeDetector(nullptr){
+Tracker::Tracker() : groupEnabled(true), frameTimer(new QTimer()), inputTimer(new QTimer()),
+    colorSelected(false), emptyFlag(0), haveLastPoint(false), eyeDetector(EyeDetector::getInstance(&eyes)){
     pMOG2 = createBackgroundSubtractorMOG2(25, 16, false);
     connect(frameTimer, &QTimer::timeout, this, [this](){
         if(mutex.tryLock()){
@@ -72,13 +73,6 @@ void Tracker::addDetector(Detector* detector, int queueSize){
     connect(detector, QOverload<QString, int>::of(&Detector::detected), this, QOverload<QString, int>::of(&Tracker::commandSignal));
 }
 
-void Tracker::turnonEyeDetector(){
-    Mat frame;
-    config.readFrame(frame);
-    this->eyeDetector = EyeDetector::getInstance(frame, config.getEyeDetectorPath(), &eyes);
-    this->eyeDetector->connect();
-    this->groupEnabled = true;
-}
 
 void Tracker::start(){
     if(frameTimer->isActive())
@@ -93,8 +87,7 @@ void Tracker::start(){
     putText(this->cameraNotOpened, "Camera is not opened. Please set the camera in the configuration menu", Point(10, 20), 2, 0.4, Scalar::all(255));
     this->drawBorders(frame);
     this->drawGroupSigns(frame);
-    if(QFileInfo::exists(config.getEyeDetectorPath()))
-        this->turnonEyeDetector();
+
 }
 
 void Tracker::stop(){
@@ -104,8 +97,6 @@ void Tracker::stop(){
     inputTimer->stop();
     this->clearQueues();
     config.cameraOff();
-    if(this->eyeDetector != nullptr)
-        this->eyeDetector->stop();
 }
 
 
@@ -119,8 +110,8 @@ Mat Tracker::subtractBackground(Mat frame){
     Mat mogMask;
     Mat moving;
     pMOG2->apply(frame, mogMask);
-    morphologyEx(mogMask, mogMask, CV_MOP_ERODE, getStructuringElement(MORPH_ELLIPSE, Size(config.getKernel(), config.getKernel())));
-    morphologyEx(mogMask, mogMask, CV_MOP_DILATE, getStructuringElement(MORPH_ELLIPSE, Size(config.getKernel(), config.getKernel())));
+    morphologyEx(mogMask, mogMask, MORPH_ERODE, getStructuringElement(MORPH_ELLIPSE, Size(config.getKernel(), config.getKernel())));
+    morphologyEx(mogMask, mogMask, MORPH_DILATE, getStructuringElement(MORPH_ELLIPSE, Size(config.getKernel(), config.getKernel())));
     threshold(mogMask, mogMask, config.getThreshold(), 255, THRESH_BINARY);
     cvtColor(mogMask, mogMask, COLOR_GRAY2BGR);
     bitwise_and(frame, mogMask, moving);
@@ -147,7 +138,7 @@ Mat Tracker::detectColoredObject(Mat moving, bool& hsvExtension){
     }
     cvtColor(colorMask, colorMask, COLOR_GRAY2BGR);
     bitwise_and(moving, colorMask, colored);
-    morphologyEx(colored, colored, CV_MOP_ERODE, getStructuringElement(MORPH_ELLIPSE,Size(3, 3)));
+    morphologyEx(colored, colored, MORPH_ERODE, getStructuringElement(MORPH_ELLIPSE,Size(3, 3)));
     return colored;
 }
 
@@ -203,8 +194,8 @@ void Tracker::updatePicture(){
     bool hsvExtension = false;
     config.readFrame(frame);
     flip(frame, frame, 1);
-    if(this->eyeDetector != nullptr)
-        this->eyeDetector->detectEyes(frame);
+    if(groupEnabled)
+        this->eyeDetector.detectEyes(frame);
     moving = this->subtractBackground(frame);
     colored = this->detectColoredObject(moving, hsvExtension);
     frame = this->detectActions(frame, colored, hsvExtension);
@@ -215,7 +206,7 @@ void Tracker::updatePicture(){
         bitwise_or(frame, currentEyes, frame);
     }
     bitwise_or(frame, this->currentGroup, frame);
-    circle(frame, this->eyes, 3, Scalar(255, 255, 255), -1);
+    circle(frame, this->eyes, 3, Scalar(255, 255, 255), FILLED);
     emit this->updatePictureSignal(frame);
 }
 
@@ -292,23 +283,24 @@ void Tracker::drawGroupSigns(Mat frame){
     Mat mat_empty = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
     // (0)
     Mat mat = mat_empty.clone();
-    circle(mat, Point(widthUnit * NUMERATOR_LOW + SIGN_RADIUS, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    circle(mat, Point(widthUnit * NUMERATOR_LOW + SIGN_RADIUS, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), FILLED);
     this->currentGroupMat.push_back(mat);
     // (1)
     mat = mat_empty.clone();
-    circle(mat, Point(SIGN_RADIUS, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+
+    circle(mat, Point(SIGN_RADIUS, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), FILLED);
     this->currentGroupMat.push_back(mat);
     // (2)
     mat = mat_empty.clone();
-    circle(mat, Point(SIGN_RADIUS + widthUnit * NUMERATOR_HIGH, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    circle(mat, Point(SIGN_RADIUS + widthUnit * NUMERATOR_HIGH, SIGN_RADIUS), SIGN_RADIUS, Scalar(255, 255, 0), FILLED);
     this->currentGroupMat.push_back(mat);
     // (3)
     mat = mat_empty.clone();
-    circle(mat, Point(SIGN_RADIUS, SIGN_RADIUS + heightUnit), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    circle(mat, Point(SIGN_RADIUS, SIGN_RADIUS + heightUnit), SIGN_RADIUS, Scalar(255, 255, 0), FILLED);
     this->currentGroupMat.push_back(mat);
     // (4)
     mat = mat_empty.clone();
-    circle(mat, Point(SIGN_RADIUS + widthUnit * NUMERATOR_HIGH, SIGN_RADIUS + heightUnit), SIGN_RADIUS, Scalar(255, 255, 0), CV_FILLED);
+    circle(mat, Point(SIGN_RADIUS + widthUnit * NUMERATOR_HIGH, SIGN_RADIUS + heightUnit), SIGN_RADIUS, Scalar(255, 255, 0), FILLED);
     this->currentGroupMat.push_back(mat);
 }
 

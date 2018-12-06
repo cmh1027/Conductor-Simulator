@@ -38,8 +38,7 @@ namespace Menu{
         this->thresholdLabel = parent->findChild<QLabel*>("thresholdLabel");
         this->queueSizeLabel = parent->findChild<QLabel*>("queueSizeLabel");
         this->cameraLineEdit = parent->findChild<QLineEdit*>("cameraLineEdit");
-        this->filePath = parent->findChild<QLabel*>("pathLabel");
-        auto pathButton = parent->findChild<QPushButton*>("pathButton");
+        this->groupEnableButton = parent->findChild<QPushButton*>("groupEnableButton");
         historySlider->setValue(config.getHistory());
         kernelSlider->setValue(config.getKernel());
         thresholdSlider->setValue(config.getThreshold());
@@ -52,7 +51,6 @@ namespace Menu{
         queueSizeLabel->setText(QString::number(queueSizeSlider->value()));
         cameraLineEdit->setValidator(new QIntValidator(0, 10));
         cameraLineEdit->setText(QString::number(config.camNumber));
-        filePath->setText(config.getEyeDetectorPath());
         list = parent->findChild<QListWidget*>("listWidget");
         commandList = parent->findChild<QListWidget*>("commandListWidget");
         foreach(auto beat, Beats){
@@ -69,6 +67,7 @@ namespace Menu{
         connect(tracker, QOverload<QString, int>::of(&Tracker::commandSignal), this, QOverload<const QString&, int>::of(&Configuration::addItem));
         connect(parent->findChild<QPushButton*>("backButton"), &QPushButton::clicked, this, &Configuration::back);
         connect(parent->findChild<QPushButton*>("clearButton"), &QPushButton::clicked, this, &Configuration::clearList);
+        connect(groupEnableButton, &QPushButton::clicked, this, &Configuration::toggleGroupEnable);
         connect(tracker, &Tracker::updatePictureSignal, this, &Configuration::updatePicture);
         connect(frameLabel, &ClickableLabel::clicked, this, &Configuration::setColor);
         connect(ratioSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this, &Configuration::setRatio);
@@ -76,7 +75,6 @@ namespace Menu{
         connect(historySlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this, &Configuration::setHistory);
         connect(kernelSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this, &Configuration::setKernel);
         connect(queueSizeSlider, static_cast<void(QSlider::*)(int)>(&QSlider::valueChanged), this, &Configuration::setQueueSize);
-        connect(pathButton, &QPushButton::clicked, this, &Configuration::setEyeDetectorPath);
         tracker->start();
     }
 
@@ -151,13 +149,12 @@ namespace Menu{
         queueSizeLabel->setText(QString::number(value));
     }
 
-    void Configuration::setEyeDetectorPath(){
-        QString fileName = QFileDialog::getOpenFileName(parent, "Set exe path", "./", tr("exe file (*.exe)"));
-        if(fileName.isEmpty())
-            return;
-        config.setEyeDetectorPath(fileName);
-        this->filePath->setText(fileName);
-        this->tracker->turnonEyeDetector();
+    void Configuration::toggleGroupEnable(){
+        tracker->groupEnabled = !tracker->groupEnabled;
+        if(tracker->groupEnabled)
+            this->groupEnableButton->setText("Off");
+        else
+            this->groupEnableButton->setText("On");
     }
 
 }

@@ -54,13 +54,13 @@ Scalar hsvMult(const Scalar& scalar, double hRatio, double sRatio, double vRatio
 
 void drawPoints(Mat& canvas, const PointQueue* queue, const Scalar& scalar){
     for(auto it = queue->begin(); it != queue->end(); it++){
-        circle(canvas, (*it), 2, scalar, CV_FILLED);
+        circle(canvas, (*it), 2, scalar, FILLED);
     }
 }
 
 void drawPoints(Mat& canvas, const PointQueue& queue, const Scalar& scalar){
     for(auto it = queue.begin(); it != queue.end(); it++){
-        circle(canvas, (*it), 2, scalar, CV_FILLED);
+        circle(canvas, (*it), 2, scalar, FILLED);
     }
 }
 

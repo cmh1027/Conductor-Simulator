@@ -35,7 +35,6 @@ public:
     virtual ~Tracker();
     void start();
     void stop();
-    void turnonEyeDetector();
     void setCurrentGroup(int);
     int eyePosition;
     bool groupEnabled;
@@ -53,12 +52,12 @@ private:
     bool haveLastPoint;
     Mat cameraNotOpened;
     Rect lastEyesPoint;
-    EyeDetector* eyeDetector;
     Mat borders;
     Mat currentGroup;
     QVector<Mat> currentEyesPosMat;
     QVector<Mat> currentGroupMat;
     Point eyes;
+    EyeDetector& eyeDetector;
     void prepareDetectors();
     void addDetector(Detector*, int = -1);
     void detectActions(Point&, int, Mat&);

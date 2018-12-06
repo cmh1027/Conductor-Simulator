@@ -1,18 +1,15 @@
+#include <vector>
 #include "eyedetector.h"
-EyeDetector::EyeDetector(){}
-
-EyeDetector::~EyeDetector(){
-    CloseHandle(mat_pipe);
-    CloseHandle(eye_pipe);
+EyeDetector::EyeDetector(){
+    faceDetector = CascadeClassifier("C:/Users/serom/Desktop/qt/Conductor-Simulator/eyedetector/resources/haarcascade_frontalface_alt2.xml");
+    facemark = FacemarkLBF::create();
+    facemark->loadModel("C:/Users/serom/Desktop/qt/Conductor-Simulator/eyedetector/resources/lbfmodel.yaml");
 }
 
-void EyeDetector::set(Mat frame, const QString& path, Point* eyes){
+EyeDetector::~EyeDetector(){}
+
+void EyeDetector::set(Point* eyes){
     Q_ASSERT(eyes != nullptr);
-    this->size = static_cast<int>(frame.step[0]) * frame.rows;
-    this->rows = frame.rows;
-    this->cols = frame.cols;
-    this->type = frame.type();
-    this->path = path;
     this->eyes = eyes;
 }
 
@@ -24,69 +21,46 @@ void EyeDetector::detectEyes(Mat frame){
 }
 
 void EyeDetector::run(){
-    Point eyes;
-    WriteFile(this->mat_pipe, reinterpret_cast<char*>(frame.data), static_cast<DWORD>(this->size), nullptr, nullptr);
-    if(PeekNamedPipe(this->eye_pipe, nullptr, 0, nullptr, nullptr, nullptr)){
-       ReadFile(this->eye_pipe, reinterpret_cast<char*>(&eyes), sizeof(Point), nullptr, nullptr);
-       *this->eyes = eyes;
-    }
-    else{
-       DWORD dwError = GetLastError();
-       if(dwError == ERROR_BROKEN_PIPE)
-           this->reconnect();
+    vector<Rect> faces;
+    Mat gray;
+    cvtColor(frame, gray, COLOR_BGR2GRAY);
+    faceDetector.detectMultiScale(gray, faces);
+    if(faces.size() != 1) {
+        return;
+    };
+    vector<vector<Point2f>> landmarks;
+    bool success = facemark->fit(frame, faces, landmarks);
+    if(success){
+        if(landmarks.size() == 1)
+            *eyes = findEyes(landmarks[0]);
     }
 }
 
-EyeDetector* EyeDetector::getInstance(Mat frame, const QString& path, Point* eyes){
-    static EyeDetector* instance = nullptr;
-    if(instance == nullptr)
-        instance = new EyeDetector();
-    else
-        instance->stop();
-    instance->set(frame, path, eyes);
+EyeDetector& EyeDetector::getInstance(Point* eyes){
+    static EyeDetector instance;
+    instance.set(eyes);
     return instance;
 }
 
-void EyeDetector::connect(){
-    mat_pipe = CREATEPIPE(MATNAME, PIPE_ACCESS_OUTBOUND, static_cast<DWORD>(size));
-    size_pipe = CREATEPIPE(MATSIZENAME, PIPE_ACCESS_OUTBOUND, sizeof(int));
-    eye_pipe = CREATEPIPE(EYENAME, PIPE_ACCESS_INBOUND, sizeof(Point));
-    row_pipe = CREATEPIPE(ROWNAME, PIPE_ACCESS_OUTBOUND, sizeof(int));
-    col_pipe = CREATEPIPE(COLNAME, PIPE_ACCESS_OUTBOUND, sizeof(int));
-    type_pipe = CREATEPIPE(TYPENAME, PIPE_ACCESS_OUTBOUND, sizeof(int));
-    STARTUPINFO si;
-    memset(&si, 0, sizeof(si));
-    memset(&pi, 0, sizeof(pi));
-    si.cb = sizeof(si);
-    wchar_t* file = new wchar_t[path.length()+1];
-    path.toWCharArray(file);
-    file[path.length()] = 0;
-    CreateProcess(nullptr, file, nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
-    delete[] file;
-    ConnectNamedPipe(mat_pipe, nullptr);
-    ConnectNamedPipe(size_pipe, nullptr);
-    ConnectNamedPipe(eye_pipe, nullptr);
-    ConnectNamedPipe(row_pipe, nullptr);
-    ConnectNamedPipe(col_pipe, nullptr);
-    ConnectNamedPipe(type_pipe, nullptr);
-    WriteFile(size_pipe, reinterpret_cast<char*>(&size), sizeof(int), nullptr, nullptr);
-    WriteFile(row_pipe, reinterpret_cast<char*>(&rows), sizeof(int), nullptr, nullptr);
-    WriteFile(col_pipe, reinterpret_cast<char*>(&cols), sizeof(int), nullptr, nullptr);
-    WriteFile(type_pipe, reinterpret_cast<char*>(&type), sizeof(int), nullptr, nullptr);
-    CloseHandle(size_pipe);
-    CloseHandle(row_pipe);
-    CloseHandle(col_pipe);
-    CloseHandle(type_pipe);
+Point midpoint(const vector<Point2f>& landmarks, const int start, const int end){
+    int x = 0, y = 0;
+    for (int i = start; i <= end; i++){
+      x += landmarks[i].x;
+      y += landmarks[i].y;
+    }
+    x /= end-start+1;
+    y /= end-start+1;
+    return Point(x, y);
 }
 
-void EyeDetector::reconnect(){
-    stop();
-    QThread::start();
-}
 
-void EyeDetector::stop(){
-    CloseHandle(mat_pipe);
-    CloseHandle(eye_pipe);
-    CloseHandle(pi.hThread);
-    CloseHandle(pi.hProcess);
+Point findEyes(vector<Point2f>& landmarks){
+    int x = 0, y = 0;
+    if (landmarks.size() == 68){
+      auto left_eye = midpoint(landmarks, 36, 41);
+      auto right_eye = midpoint(landmarks, 42, 47);
+      x = (left_eye.x + right_eye.x) / 2;
+      y = (left_eye.y + right_eye.y) / 2;
+    }
+    return Point(x, y);
 }
