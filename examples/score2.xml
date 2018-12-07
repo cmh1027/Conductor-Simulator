@@ -1,0 +1,97 @@
+<conduct>
+ <volume>1</volume>
+ <tempo>1</tempo>
+ <group>1</group>
+ <commands>
+  <command time="0" action="pp"/>
+  <command time="0" action="1"/>
+  <command time="0.1" action="Vertical"/>
+  <command time="1.6" action="Vertical"/>
+  <command time="3.1" action="Vertical"/>
+  <command time="4.6" action="Vertical"/>
+  <command time="6.1" action="Vertical"/>
+  <command time="7.6" action="Vertical"/>
+  <command time="8.5" action="2"/>
+  <command time="9" action="p"/>
+  <command time="9.2" action="Vertical"/>
+  <command time="10.7" action="Vertical"/>
+  <command time="12.2" action="Vertical"/>
+  <command time="13.7" action="Vertical"/>
+  <command time="15.2" action="Vertical"/>
+  <command time="16.7" action="Horizontal"/>
+  <command time="18.2" action="Horizontal"/>
+  <command time="19.7" action="Horizontal"/>
+  <command time="21.2" action="Whip"/>
+  <command time="24.1" action="Vertical"/>
+  <command time="25.6" action="Vertical"/>
+  <command time="27.1" action="Horizontal"/>
+  <command time="28.6" action="Horizontal"/>
+  <command time="30.1" action="Horizontal"/>
+  <command time="31.6" action="Horizontal"/>
+  <command time="33.1" action="Vertical"/>
+  <command time="34.6" action="Vertical"/>
+  <command time="36.1" action="Vertical"/>
+  <command time="37.6" action="Vertical"/>
+  <command time="39.1" action="Vertical"/>
+  <command time="40.6" action="Vertical"/>
+  <command time="42.1" action="Horizontal"/>
+  <command time="43.6" action="Horizontal"/>
+  <command time="45.1" action="Horizontal"/>
+  <command time="46.7" action="Horizontal"/>
+  <command time="48.1" action="Horizontal"/>
+  <command time="49.6" action="Horizontal"/>
+  <command time="51.1" action="Horizontal"/>
+  <command time="52.6" action="Horizontal"/>
+  <command time="54.1" action="Horizontal"/>
+  <command time="55.6" action="Horizontal"/>
+  <command time="57.1" action="Vertical"/>
+  <command time="58.6" action="Vertical"/>
+  <command time="60.1" action="Vertical"/>
+  <command time="60.1" action="Vertical"/>
+  <command time="61.6" action="Vertical"/>
+  <command time="63.1" action="Horizontal"/>
+  <command time="64.6" action="Horizontal"/>
+  <command time="66.1" action="Vertical"/>
+  <command time="67.6" action="Vertical"/>
+  <command time="69.1" action="Vertical"/>
+  <command time="70.6" action="Vertical"/>
+  <command time="72.1" action="Vertical"/>
+  <command time="73.6" action="Vertical"/>
+  <command time="75.1" action="Vertical"/>
+  <command time="76.6" action="Vertical"/>
+  <command time="78.1" action="Accent"/>
+  <command time="79.6" action="Accent"/>
+  <command time="81.1" action="Accent"/>
+  <command time="82.6" action="Accent"/>
+  <command time="84.1" action="Horizontal"/>
+  <command time="85.6" action="Horizontal"/>
+  <command time="87.1" action="Horizontal"/>
+  <command time="88.6" action="Horizontal"/>
+  <command time="90.1" action="Horizontal"/>
+  <command time="90.2" action="3"/>
+  <command time="90.5" action="pp"/>
+  <command time="91.6" action="Vertical"/>
+  <command time="93.1" action="Vertical"/>
+  <command time="94.6" action="Vertical"/>
+  <command time="96.1" action="Vertical"/>
+  <command time="97.6" action="Vertical"/>
+  <command time="99.1" action="Vertical"/>
+  <command time="100.6" action="Vertical"/>
+  <command time="101" action="0"/>
+  <command time="102" action="p"/>
+  <command time="102.1" action="Horizontal"/>
+  <command time="103.6" action="Horizontal"/>
+  <command time="105.1" action="Horizontal"/>
+  <command time="106.6" action="Horizontal"/>
+  <command time="108.1" action="Horizontal"/>
+  <command time="109.6" action="Horizontal"/>
+  <command time="111.1" action="Horizontal"/>
+  <command time="112.6" action="Horizontal"/>
+  <command time="114.5" action="Vertical"/>
+  <command time="116" action="Vertical"/>
+  <command time="118" action="Whip"/>
+ </commands>
+ <musics>
+  <music main="1">C:/Users/serom/Desktop/Central park.mp3</music>
+ </musics>
+</conduct>
