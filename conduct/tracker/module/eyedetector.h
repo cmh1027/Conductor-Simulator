@@ -13,15 +13,14 @@ class EyeDetector : public QThread{
     Q_OBJECT
 
 public:
-   static EyeDetector& getInstance(Point*);
+   static EyeDetector& getInstance();
    void detectEyes(Mat);
    void start() = delete;
-
+   void set(Point*);
 
 private:
    EyeDetector();
    virtual ~EyeDetector() override;
-   void set(Point*);
    void run() override;
    Point* eyes;
    Mat frame;

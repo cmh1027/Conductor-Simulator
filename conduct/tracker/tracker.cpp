@@ -21,7 +21,7 @@ const int SIGN_RADIUS = 5;
 
 
 Tracker::Tracker() : groupEnabled(true), frameTimer(new QTimer()), inputTimer(new QTimer()),
-    colorSelected(false), emptyFlag(0), haveLastPoint(false), eyeDetector(EyeDetector::getInstance(&eyes)){
+    colorSelected(false), emptyFlag(0), haveLastPoint(false), eyeDetector(EyeDetector::getInstance()){
     pMOG2 = createBackgroundSubtractorMOG2(25, 16, false);
     connect(frameTimer, &QTimer::timeout, this, [this](){
         if(mutex.tryLock()){
@@ -40,6 +40,8 @@ Tracker::Tracker() : groupEnabled(true), frameTimer(new QTimer()), inputTimer(ne
 }
 
 Tracker::~Tracker(){
+    if(eyeDetector.isRunning())
+        eyeDetector.wait();
     delete frameTimer;
     delete inputTimer;
     foreach(auto detector, this->detectors){
@@ -85,6 +87,7 @@ void Tracker::start(){
     this->cameraNotOpened = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
     this->currentGroup = Mat::zeros(frame.rows, frame.cols, CV_8UC3);
     putText(this->cameraNotOpened, "Camera is not opened. Please set the camera in the configuration menu", Point(10, 20), 2, 0.4, Scalar::all(255));
+    eyeDetector.set(&eyes);
     this->drawBorders(frame);
     this->drawGroupSigns(frame);
 

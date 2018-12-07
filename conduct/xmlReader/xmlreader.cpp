@@ -219,7 +219,7 @@ void XMLReader::addCommand(int time, const QString& command){
 }
 
 void XMLReader::addDynamic(int time, const QString& dynamic){
-    SyncTimer* timer = new SyncTimer(time, this->interval, dynamic);
+    SyncTimer* timer = new SyncTimer(time, dynamic, TickInterval);
     connect(timer, &SyncTimer::timeout, this, [=](){
         emit this->dynamicSignal(timer->command);
         this->timeoutCount += 1;
@@ -231,7 +231,7 @@ void XMLReader::addDynamic(int time, const QString& dynamic){
 }
 
 void XMLReader::addGroup(int time, const QString& group){
-    SyncTimer* timer = new SyncTimer(time, this->interval, group);
+    SyncTimer* timer = new SyncTimer(time, group, TickInterval);
     connect(timer, &SyncTimer::timeout, this, [=](){
         int groupNum = timer->command.toInt();
         if(!(0 <= groupNum && groupNum <= GroupCount))

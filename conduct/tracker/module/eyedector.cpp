@@ -8,6 +8,11 @@ EyeDetector::EyeDetector(){
 
 EyeDetector::~EyeDetector(){}
 
+EyeDetector& EyeDetector::getInstance(){
+    static EyeDetector instance;
+    return instance;
+}
+
 void EyeDetector::set(Point* eyes){
     Q_ASSERT(eyes != nullptr);
     this->eyes = eyes;
@@ -36,11 +41,6 @@ void EyeDetector::run(){
     }
 }
 
-EyeDetector& EyeDetector::getInstance(Point* eyes){
-    static EyeDetector instance;
-    instance.set(eyes);
-    return instance;
-}
 
 Point midpoint(const vector<Point2f>& landmarks, const int start, const int end){
     int x = 0, y = 0;

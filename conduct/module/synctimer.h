@@ -10,9 +10,9 @@ namespace std{
 class SyncTimer : public QObject{
     Q_OBJECT
 public:
-    SyncTimer(int=0);
-    SyncTimer(int, const QString&, int = 0);
-    SyncTimer(int, int, const QString&, int = 0);
+    SyncTimer(int);
+    SyncTimer(int, const QString&, int);
+    SyncTimer(int, int, const QString&, int);
     virtual ~SyncTimer();
     QString command;
     void setTime(int);

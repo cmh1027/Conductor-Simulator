@@ -62,6 +62,7 @@ private:
     Dynamic dynamic;
     int currentGroup;
     int successCount;
+    bool isNormalSpeed;
     void checkVerticalDynamic(int);
     void checkHorizontalDynamic(int);
     Dynamic dynamicByVertical(int);

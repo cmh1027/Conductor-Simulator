@@ -20,7 +20,8 @@ const QMap<Dynamic, int> MaximumHorizontalDistance = {{Dynamic::pp, 170}, {Dynam
 
 
 ConductSimulator::ConductSimulator() : tracker(nullptr), lastTimer(new SyncTimer(TickInterval)),
-    startTimer(new CountDownTimer()), score(0), energy(0), isPlaying(false), isPause(false), groupEnabled(false), dynamic(None){
+    startTimer(new CountDownTimer()), score(0), energy(0), isPlaying(false), isPause(false),
+    groupEnabled(false), dynamic(None){
     this->setDifficulty(Difficulty::Normal);
     xmlReader = new XMLReader(this->interval);
     connect(xmlReader, &XMLReader::tickSignal, this, [=]{
@@ -126,6 +127,7 @@ bool ConductSimulator::gameStart(){
     this->clearCommands();
     this->isPlaying = true;
     this->successCount = 0;
+    this->isNormalSpeed = true;
     this->startTimer->start(3);
     return true;
 }
@@ -278,11 +280,15 @@ void ConductSimulator::commandSuccess(int remaining){
     }
     else{
         emit this->commandSignal(Precision::Bad);
+        if(this->successCount > 0)
+            this->successCount -= 1;
     }
-    if(precision < 0.7){
+    if(precision < 0.7 && !this->isNormalSpeed){
         this->successCount += 1;
         if(this->successCount == SpeedRollbackCount[this->difficulty]){
             this->successCount = 0;
+            xmlReader->normalizeSpeed();
+            this->isNormalSpeed = true;
         }
     }
     this->addEnergy(1);
@@ -300,8 +306,11 @@ void ConductSimulator::commandFail(){
     this->addScore(-50);
     this->addEnergy(-7);
     emit this->commandSignal(Precision::Fail);
-    if(Random::percent(DifProb[this->difficulty]))
+    this->successCount = 0;
+    if(Random::percent(DifProb[this->difficulty])){
         xmlReader->randomizeSpeed();
+        this->isNormalSpeed = false;
+    }
 }
 
 
@@ -309,8 +318,10 @@ void ConductSimulator::commandFail(int originGroup, int currentGroup){
     this->addScore(-50);
     this->addEnergy(-7);
     emit this->commandSignal(Precision::Fail);
-    if(Random::percent(DifProb[this->difficulty]))
+    if(Random::percent(DifProb[this->difficulty])){
         xmlReader->randomizeSpeed(originGroup, currentGroup);
+        this->isNormalSpeed = false;
+    }
 }
 
 
